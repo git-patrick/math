@@ -1,0 +1,45 @@
+compile time indefinite intregrals of analytic functions!
+additional analytic expression simplification rules (in particular, add needs work)
+
+PERMUTATIONS (symmetric group)
+
+TOPOLOGY 
+
+
+GROUP DIAGRAMS
+FUNCTION PLOTTING
+
+
+ALGORITHMIC PROCESSES
+----------------------------
+ISO SURFACE FINDER
+LIMITS
+MIN/MAX FINDER OVER A VOLUME
+OPTIONS FOR MAKING THE NUMERIC INTEGRAL MORE ACCURATE,
+complex integral
+
+
+
+taylor expansion
+
+the infinitesimal values in infinitesimal_tag cast operators were basically pulled out of a hat.
+I need to think about them and choose logically.
+
+think about specializing 1x1 matrices for performance?
+
+	DERIVATIVE / COMPLEX DERIVATIVE X
+	dihedral group  X
+	symmetric group
+	function description X
+	derivative X
+	compile time creation of analytic / holomorphic function - partially complete
+
+	determinant of my matrix class, going to use symmetric group permutations.
+	inverse of matrix class - going to use determinant
+
+	limits
+	
+	
+	
+things I really want to get to:
+	really want to go over manifolds and more topology
