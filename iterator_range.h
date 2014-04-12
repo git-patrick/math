@@ -25,7 +25,7 @@ namespace pat {
 		
 		typedef typename traits::difference_type			size_type;
 		
-		template <typename Iter = iterator, typename std::enable_if<std::is_constructible<Iter>::value>::type ...>
+		template <typename Iter = iterator, typename = typename std::enable_if<std::is_constructible<Iter>::value>::type>
 		iterator_range() : _begin{}, _end{} { }
 		
 		iterator_range(iterator_range && r) = default;
@@ -38,7 +38,7 @@ namespace pat {
 			return *this;
 		}
 		
-		iterator_range(Iterator beginning, Iterator ending) : _begin(std::move(beginning)), _end(std::move(ending)) {
+		iterator_range(Iterator const & beginning, Iterator const & ending) : _begin(beginning), _end(ending) {
 			
 		}
 		
@@ -54,30 +54,30 @@ namespace pat {
 		iterator			begin() const	{ return _begin; }
 		iterator			end() const		{ return _end; }
 		
-		template <typename Iter = iterator>
-		if_iterator_satisfies<Iter, std::random_access_iterator_tag, typename traits::reference>
+		template <typename Iter = iterator, typename = typename if_iterator_satisfies<Iter, std::random_access_iterator_tag>::type>
+		typename traits::reference
 		operator[](typename traits::difference_type d) const {
 			return _begin[d];
 		}
-		template <typename Iter = iterator>
-		if_iterator_satisfies<Iter, std::random_access_iterator_tag, size_type>
+		template <typename Iter = iterator, typename = typename if_iterator_satisfies<Iter, std::random_access_iterator_tag>::type>
+		size_type
 		size() const {
 			return _end - _begin;
 		}
 		
-		template <typename Iter = iterator>
-		if_iterator_satisfies<Iter, std::bidirectional_iterator_tag, reverse_iterator>
+		template <typename Iter = iterator, typename = typename if_iterator_satisfies<Iter, std::bidirectional_iterator_tag>::type>
+		reverse_iterator
 		rbegin() const	{ return reverse_iterator(_end); }
 		
-		template <typename Iter = iterator>
-		if_iterator_satisfies<Iter, std::bidirectional_iterator_tag, reverse_iterator>
+		template <typename Iter = iterator, typename = typename if_iterator_satisfies<Iter, std::bidirectional_iterator_tag>::type>
+		reverse_iterator
 		rend() const	{ return reverse_iterator(_begin); }
 	private:
 		iterator _begin, _end;
 	};
 	
 	template <typename Iterator>
-	inline iterator_range<Iterator> make_range(Iterator b, Iterator e) {
+	inline iterator_range<Iterator> make_range(Iterator const & b, Iterator const & e) {
 		return iterator_range<Iterator>(b,e);
 	}
 	

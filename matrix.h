@@ -26,6 +26,7 @@
 #include "functors.h"
 
 using pat::iterator_range;
+using pat::make_range;
 
 namespace math {
 	template <typename Type = reals_t, std::size_t N = 3, std::size_t M = 3>
