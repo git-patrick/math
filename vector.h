@@ -20,7 +20,7 @@ namespace math {
 	
 	template <std::size_t N>
 	reals_t inner_product(vector<reals_t,N> const & a, vector<reals_t,N> const & b) {
-		reals_t sum;
+		reals_t sum = 0.0;
 		
 		for (int i = 0; i < N; i++)
 			sum += reals_t(a[i] * b[i]);
@@ -30,7 +30,7 @@ namespace math {
 	
 	template <std::size_t N>
 	reals_t inner_product(vector<complex_t,N> const & a, vector<complex_t,N> const & b) {
-		reals_t sum;
+		reals_t sum = 0.0;
 		
 		for (int i = 0; i < N; i++)
 			sum += reals_t(a[i] * conj(b[i]));
@@ -49,16 +49,11 @@ namespace math {
 	}
 	
 	// support a dot product of Nx1 matrices with other Nx1 matrices without having to transpose and do standard matrix multiplication.
-	
 	template <typename T, std::size_t N>
 	auto operator*(vector<T,N> const & a, vector<T,N> const & b) -> decltype(inner_product(a,b)) {
 		return inner_product(a,b);
 	}
 	
-	// written this way so std::array and my darray implementation both work
-	// through aggregrate initialization and initializer_list constructor respectively
-	// the extra copy should be elided, and so this should be as fast as the c++14 version
-	// of just returning { ... };
 	template <typename T>
 	vector<T,3> cross(vector<T,3> const & a, vector<T,3> const & b) {
 		vector<T,3> ret = { a[1] * b[2] - a[2] * b[1],
@@ -66,31 +61,6 @@ namespace math {
 							a[0] * b[1] - a[1] * b[0] };
 		
 		return ret;
-	}
-	
-	template <typename T>
-	vector<T,3>&& cross(vector<T,3> && a, vector<T,3> const & b) {
-		a = { a[1] * b[2] - a[2] * b[1],
-			  a[2] * b[0] - a[0] * b[2],
-			  a[0] * b[1] - a[1] * b[0] };
-		
-		return std::move(a);
-	}
-	template <typename T>
-	vector<T,3>&& cross(vector<T,3> const & a, vector<T,3> && b) {
-		b = { a[1] * b[2] - a[2] * b[1],
-			  a[2] * b[0] - a[0] * b[2],
-			  a[0] * b[1] - a[1] * b[0] };
-		
-		return std::move(b);
-	}
-	template <typename T>
-	vector<T,3>&& cross(vector<T,3> && a, vector<T,3> && b) {
-		a = { a[1] * b[2] - a[2] * b[1],
-			  a[2] * b[0] - a[0] * b[2],
-			  a[0] * b[1] - a[1] * b[0] };
-		
-		return std::move(a);
 	}
 }
 
