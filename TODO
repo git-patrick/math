@@ -1,5 +1,5 @@
 compile time indefinite intregrals of analytic functions!
-additional analytic expression simplification rules (in particular, add needs work)
+additional analytic expression simplification rules (in particular, add and sub need work)
 
 PERMUTATIONS (symmetric group)
 
@@ -43,3 +43,7 @@ think about specializing 1x1 matrices for performance?
 	
 things I really want to get to:
 	really want to go over manifolds and more topology
+
+
+
+fix the iterator adjuster / iterator.h / iterator_range.h stuff.

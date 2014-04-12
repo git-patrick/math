@@ -11,15 +11,27 @@
 #include "derivative.h"
 
 #define trace()
-class arbitrary_functor : public math::function<double(double)> {
+class arbitrary_functor : public math::function<double(double, double)> {
 public:
 	double operator()(double x, double y) const {
 		return x * x * x;
 	}
 };
 
+#define trace()
+class arbitrary_functor2 : public math::function<double(double)> {
+public:
+	double operator()(double x) const {
+		return sqrt(x);
+	}
+};
+
 std::ostream & operator << (std::ostream & o, arbitrary_functor const & m) {
 	return o << "arbitrary_functor(x, y)";
+}
+
+std::ostream & operator << (std::ostream & o, arbitrary_functor2 const & m) {
+	return o << "arbitrary_functor2(x)";
 }
 
 int main(int argc, const char * argv[])
@@ -45,7 +57,8 @@ int main(int argc, const char * argv[])
 		<< "COMPILE TIME EXPRESSION SIMPLIFICATION" << std::endl
 		<< "    " << multiply<rational<0>, add<x,x>>() << std::endl
 		<< "    " << multiply<add<x,x>, add<x,x>>() << std::endl
-		<< "    " << multiply<rational<3,2>, x, complex<rational<3>,rational<1>>, x, x, x, exp<y>, sin<z>, exp<x>>() << std::endl << std::endl
+		<< "    " << multiply<rational<3,2>, x, complex<rational<3>,rational<1>>, x, x, x, exp<y>, sin<z>, exp<x>>() << std::endl
+		<< "    " << multiply<exp<x>, x, exp<y>, compose<arbitrary_functor2, add<x,y>>>() << std::endl << std::endl
 	;
 	
 	std::cout
@@ -62,7 +75,8 @@ int main(int argc, const char * argv[])
 	
 	std::cout
 		<< "MIXING EXACT COMPILE TIME DERIVATIVES WITH NUMERIC DERIVATIVES OF ARBITRARY FUNCTORS" << std::endl
-		<< "    " << D<multiply<exp<x>, x, exp<y>, arbitrary_functor>, x>() << std::endl << std::endl
+		<< "    " << D<multiply<exp<x>, x, exp<y>, arbitrary_functor>, x>() << std::endl
+		<< "    " << D<multiply<compose<arbitrary_functor2, multiply<x,x>>>,x>() << std::endl << std::endl
 	;
 	
 	std::cout

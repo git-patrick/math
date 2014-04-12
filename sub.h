@@ -9,7 +9,7 @@
 #ifndef math_sub_h
 #define math_sub_h
 
-//#include "multiply.h"
+#include "multiply.h"
 
 namespace math {
 	namespace detail {
@@ -43,11 +43,10 @@ namespace math {
 			typedef F type;
 		};
 		
-		/*
 		template <typename F, std::intmax_t D1>
 		struct _sub<rational<0, D1>, F> {
 			typedef multiply<rational<-1>, F> type;
-		}; */
+		};
 		
 		template <std::intmax_t D1, std::intmax_t D2>
 		struct _sub<rational<0, D1>, rational<0, D2>> {

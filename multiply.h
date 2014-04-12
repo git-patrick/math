@@ -216,11 +216,6 @@ namespace math {
 		
 		// lots of very simliar template partial specializations.  simplest implementation is with macros.
 		
-		// no swap conditions unnecessary for these two since the simplifications above will always combine rationals
-		// and complex, so they will never get here in need of swapping.
-		
-		
-		
 		_NOSWAPT(rational<N COMMA D>, select<n>, sort_priority, std::size_t n COMMA std::intmax_t N COMMA std::intmax_t D);
 		_NOSWAPT(complex<R COMMA I>,  select<n>, sort_priority, std::size_t n COMMA typename R COMMA typename I);
 		
@@ -351,6 +346,13 @@ namespace math {
 		struct __multiply<___multiply<F, G>, ___multiply<H, J>, simplify_priority> {
 			template <typename A = F> using type = multiply<A,G,H,J>;
 		};
+		
+		// get us into standard orientation for further simplification
+		template <typename F, typename H, typename J>
+		struct __multiply<F, ___multiply<H, J>, sort_priority> {
+			template <typename A = F> using type = multiply<___multiply<H, J>, A>;
+		};
+		
 	}
 	
 	

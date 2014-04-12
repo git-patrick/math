@@ -138,6 +138,11 @@ namespace math {
 		struct __D<__ln<T>, dx, derivative_analytic_stage> {
 			template <typename __T=T> using type = multiply<__pow<__T, rational<-1>>, D<__T, dx>>;
 		};
+		
+		template <typename F, typename G, typename dx>
+		struct __D<compose<F, G>, dx, derivative_analytic_stage> {
+			template <typename __T=F> using type = multiply<compose<D<__T, dx>, G>, D<G, dx>>;
+		};
 	}
 }
 

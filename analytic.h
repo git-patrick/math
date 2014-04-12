@@ -13,5 +13,5 @@
 #include "sub.h"
 #include "trig.h"
 #include "exponential.h"
-
+#include "compose.h"
 

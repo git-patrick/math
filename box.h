@@ -36,7 +36,7 @@ namespace math {
 		
 		// when casting the box to a vector, we just return our center (or close to if integral storage)
 		// this is used in integrals
-		operator vector_type() { return _a + diagonal() / 2; }
+		explicit operator vector_type() { return _a + diagonal() / 2; }
 		
 		vector_type		diagonal() const { return _b - _a; }
 		
@@ -208,14 +208,7 @@ namespace math {
 			
 			return t;
 		}
-		
-		
-		// this is only here so this class is officially a valid iterator / incase I change value_type... don't use this.
-		// don't like this
-		std::unique_ptr<pointer> operator->() const {
-			return std::unique_ptr<pointer>(new value_type((*_R)[_I]));
-		}
-		
+			
 		reference operator*() const {
 			assert(!is_end());
 			

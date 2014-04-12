@@ -190,27 +190,6 @@ namespace math {
 
 		return t;
 	}
-	template <typename T, std::size_t N, std::size_t M>
-	matrix<T,N,M>&& operator+(matrix<T,N,M> && a, matrix<T,N,M> const & b) {
-		for (auto i = 0; i < a.size(); ++i)
-			a[i] = a[i] + b[i];
-
-		return std::move(a);
-	}
-	template <typename T, std::size_t N, std::size_t M>
-	matrix<T,N,M>&& operator+(matrix<T,N,M> const & a, matrix<T,N,M> && b) {
-		for (auto i = 0; i < a.size(); ++i)
-			b[i] = a[i] + b[i];
-
-		return std::move(b);
-	}
-	template <typename T, std::size_t N, std::size_t M>
-	matrix<T,N,M>&& operator+(matrix<T,N,M> && a, matrix<T,N,M> && b) {
-		for (auto i = 0; i < a.size(); ++i)
-			a[i] = a[i] + b[i];
-
-		return std::move(a);
-	}
 	
 	// ------------------------------------------------------
 	// -matrix
@@ -236,27 +215,6 @@ namespace math {
 			t[i] = a[i] - b[i];
 
 		return t;
-	}
-	template <typename T, std::size_t N, std::size_t M>
-	matrix<T,N,M>&& operator-(matrix<T,N,M> && a, matrix<T,N,M> const & b) {
-		for (auto i = 0; i < a.size(); ++i)
-			a[i] = a[i] - b[i];
-
-		return std::move(a);
-	}
-	template <typename T, std::size_t N, std::size_t M>
-	matrix<T,N,M>&& operator-(matrix<T,N,M> const & a, matrix<T,N,M> && b) {
-		for (auto i = 0; i < a.size(); ++i)
-			b[i] = a[i] - b[i];
-
-		return std::move(b);
-	}
-	template <typename T, std::size_t N, std::size_t M>
-	matrix<T,N,M>&& operator-(matrix<T,N,M> && a, matrix<T,N,M> && b) {
-		for (auto i = 0; i < a.size(); ++i)
-			a[i] = a[i] - b[i];
-
-		return std::move(a);
 	}
 
 	// --------------------------------------------------
@@ -291,31 +249,6 @@ namespace math {
 	// inverse
 	// this needs to be enabled only if the matrix is over a field, not a ring.
 	// also depends on the determinant.
-	
-	
-	
-
-	// ------------------------------------------------------
-	// matrix %= scalar
-	/*
-	template <std::size_t N, std::size_t M, typename T>
-	typename std::enable_if<std::is_integral<U>::value, matrix<T,N,M>&>::type
-	operator%=(matrix<T,N,M>& a, U const & s) {
-		for (int i = 0; i < N; ++i)
-			a[i] %= s;
-		
-		return a;
-	}
-	template <std::size_t N, std::size_t M, typename T>
-	typename std::enable_if<std::is_integral<U>::value, matrix<T,N,M>&&>::type
-	operator%=(matrix<T,N,M>&& a, U const & s) {
-		for (int i = 0; i < N; ++i)
-			a[i] %= s;
-		
-		return std::move(a);
-	}
-	*/
-	
 	
 	// ------------------------------------------------------
 	// matrix *= scalar
@@ -391,17 +324,6 @@ namespace math {
 	}
 	template <std::size_t N, std::size_t M, typename T, typename Scalar,
 		typename = typename std::enable_if<
-			math::check::has_multiply<T, Scalar, T>::value
-		>::type>
-	matrix<T,N,M>&&
-	operator*(matrix<T,N,M> && a, Scalar const & s) {
-		for (auto i = 0; i < a.size(); ++i)
-			a[i] = a[i] * s;
-
-		return std::move(a);
-	}
-	template <std::size_t N, std::size_t M, typename T, typename Scalar,
-		typename = typename std::enable_if<
 			math::check::has_multiply<Scalar, T, T>::value
 		>::type>
 	matrix<T,N,M>
@@ -412,17 +334,6 @@ namespace math {
 			t[i] = s * a[i];
 		
 		return t;
-	}
-	template <std::size_t N, std::size_t M, typename T, typename Scalar,
-		typename = typename std::enable_if<
-			math::check::has_multiply<T, Scalar, T>::value
-		>::type>
-	matrix<T,N,M>&&
-	operator*(Scalar const & s, matrix<T,N,M> && a) {
-		for (int i = 0; i < a.size(); ++i)
-			a[i] = s * a[i];
-		
-		return std::move(a);
 	}
 	
 	// ------------------------------------------------------
@@ -442,37 +353,6 @@ namespace math {
 		
 		return t;
 	}
-	template <std::size_t N, std::size_t M, typename T, typename Scalar,
-		typename = typename std::enable_if<
-			math::check::has_divide<T, Scalar, T>::value
-		>::type>
-	matrix<T,N,M>&&
-	operator/(matrix<T,N,M> && a, Scalar const & s) {
-		for (int i = 0; i < a.size(); ++i)
-			a[i] = a[i] / s;
-		
-		return std::move(a);
-	}
-	
-	// ------------------------------------------------------
-	// matrix % Scalar
-	/*
-	
-	need to consider this
-	
-	template <std::size_t N, std::size_t M, typename T>
-	typename std::enable_if<std::is_integral<U>::value, matrix<T,N,M>>::type
-	operator%(matrix<T,N,M> const & a, U const & s) {
-		return matrix<T,N,M>(a) %= s;
-	}
-	template <std::size_t N, std::size_t M, typename T>
-	typename std::enable_if<std::is_integral<U>::value, matrix<T,N,M>&&>::type
-	operator%(matrix<T,N,M> && a, U const & s) {
-		a %= s;
-		
-		return std::move(a);
-	}
-	*/
 }
 
 namespace std {
