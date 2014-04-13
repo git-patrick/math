@@ -6,6 +6,7 @@
 //  Copyright (c) 2014 Patrick Sauter. All rights reserved.
 //
 
+#include "predeclarations.h"
 #include "constant.h"
 #include "select.h"
 #include "multiply.h"

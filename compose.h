@@ -12,26 +12,55 @@
 // useful for composing arbitrary functors with analytic functions.
 // derivative specializations allow the analytic portion to be compile time calculated
 
+#include <tuple>
+#include "tuple_help.h"
+
 namespace math {
-	template <typename F, typename G>
+	template <typename F, typename ... G>
 	class compose {
 	private:
-		F _f;
-		G _g;
+		typedef std::tuple<G ...> _G;
+		
+		F	_f;
+		_G	_g;
+		
+		template <typename ... Args, int ... S>
+		auto _call(pat::integer_sequence<S ...>, Args ... a) -> decltype(_f(std::get<S>(_g)(a...) ...)) {
+			return _f(std::get<S>(_g)(a...) ...);
+		}
+		
 	public:
-		F get1() const { return _f; }
-		G get2() const { return _g; }
+		F  get1() const { return _f; }
+		_G get2() const { return _g; }
 		
 		template <typename ... Args>
-		auto operator()(Args ... a) -> decltype(_f(_g(a...))) {
-			return _f(_g(a ...));
+		auto operator()(Args ... a) -> decltype(_call(pat::index_sequence_for<Args ...>{}, a ...)) {
+			return _call(pat::index_sequence_for<Args ...>{}, a ...);
 		}
 	};
 	
-	template <typename F, typename G>
-	std::ostream & operator << (std::ostream & o, compose<F,G> const & m) {
-		return o << "comp(" << m.get1() << "," << m.get2() << ")";
+	namespace detail {
+		template <typename ... G, int ... S>
+		std::ostream & print_tuple(std::ostream & o, std::tuple<G ...> const & tup, pat::integer_sequence<S ...>) {
+			using swallow = int[];
+			
+			void(swallow{ 0, ((o << (S == 0 ? "" : ", ") << std::get<S>(tup)), 0) ... });
+			
+			return o;
+		}
+	}
+	
+	template <typename ... G>
+	std::ostream & operator << (std::ostream & o, std::tuple<G ...> const & m) {
+		return detail::print_tuple(o, m, pat::index_sequence_for<G ...>{});
+	}
+	
+	template <typename F, typename ... G>
+	std::ostream & operator << (std::ostream & o, compose<F,G ...> const & m) {
+		return o << "comp(" << m.get1() << ", " << m.get2() << ")";
 	}
 }
+
+
 
 #endif

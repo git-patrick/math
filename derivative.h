@@ -72,7 +72,7 @@ namespace math {
 		
 		// derivative linear
 		template <typename F, typename G, typename dx>
-		struct __D<__add<F,G>, dx, derivative_analytic_stage> {
+		struct __D<___add<F,G>, dx, derivative_analytic_stage> {
 			template <typename __T=F> using type = add<D<__T,dx>, D<G,dx>>;
 		};
 		
@@ -139,10 +139,22 @@ namespace math {
 			template <typename __T=T> using type = multiply<__pow<__T, rational<-1>>, D<__T, dx>>;
 		};
 		
-		template <typename F, typename G, typename dx>
-		struct __D<compose<F, G>, dx, derivative_analytic_stage> {
-			template <typename __T=F> using type = multiply<compose<D<__T, dx>, G>, D<G, dx>>;
+
+		template <typename F, typename ... G, typename dx>
+		struct __D<compose<F, G ...>, dx, derivative_analytic_stage> {
+		private:
+			template <typename _F, typename S>
+			struct _detail;
+			
+			template <typename _F, int ... S>
+			struct _detail<_F, pat::integer_sequence<S ...>> {
+				template <typename __F = _F> using type = add<multiply<compose<D<__F, select<S>>, G...>, D<G, dx>>...>;
+			};
+		public:
+			template <typename __T=F> using type = typename _detail<F, pat::index_sequence_for<G ...>>::template type<>;
 		};
+		
+		
 	}
 }
 

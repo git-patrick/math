@@ -14,7 +14,7 @@
 class arbitrary_functor : public math::function<double(double, double)> {
 public:
 	double operator()(double x, double y) const {
-		return x * x * x;
+		return x * x * x + y * y * y;
 	}
 };
 
@@ -82,6 +82,12 @@ int main(int argc, const char * argv[])
 	std::cout
 		<< "EXAMPLE OUTPUT" << std::endl
 		<< "    " << D<multiply<exp<x>, x, exp<y>, arbitrary_functor>, x>()(1,0) << std::endl << std::endl
+	;
+	
+	std::cout
+		<< "COMPLICATED COMPOSITIONS, AND THEIR DERIVATIVES" << std::endl
+		<< "    " << compose<arbitrary_functor, pow<x,rational<2>>, exp<x>>() << std::endl
+		<< "    " << D<compose<arbitrary_functor, pow<x,rational<2>>, exp<x>>, x>() << std::endl
 	;
 	
     return 0;

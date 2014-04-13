@@ -25,6 +25,7 @@
 namespace math {
 	// need to enable_if this for only callable types F
 	// X is the index of the parameter we are differentiating with respect to.
+	// N is the order of the derivative
 	
 	template <typename F, std::size_t X>
 	class numeric_derivative : public function_traits<F> {
@@ -44,7 +45,7 @@ namespace math {
 					  "Assertion failed, range not a vector space over the domain field");
 		
 		functor_t			_f;
-		field_t const		_dx;
+		field_t const		_dx = infinitesimal_tag{};
 	public:
 		numeric_derivative() = default;
 
@@ -83,13 +84,12 @@ namespace math {
 			}
 		};
 		
-		template <typename ... Args, int ... S>
+		template <int ... S, typename ... Args>
 		auto _call(
 			pat::integer_sequence<S ...> s,
 			Args const & ... a
 		) const -> decltype(_f(a ...) / _dx) {
-		
-			// accuracy 4 central finite difference
+			// accuracy 4 central finite difference first order derivative
 			return (  reals_t(1.0/12.0) * _f(if_same<X, S>::_add(a, reals_t(-2) * _dx) ...)
 					- reals_t(2.0/3.0)  * _f(if_same<X, S>::_add(a, -_dx ) ...)
 					+ reals_t(2.0/3.0)  * _f(if_same<X, S>::_add(a, _dx) ...)
