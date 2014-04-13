@@ -9,22 +9,11 @@
 #ifndef math_numeric_derivative_h
 #define math_numeric_derivative_h
 
-// so my goal is to take a template parameter that is any callable type
-// and wrap that up in a functor who forwards parameters through operator() to the callable.
-// I need to be able to change arbitrarily indexed parameters to add "dx" during derivative calculation
-// solution: ended up using variadic template parameters and tuple stuff to accomplish the forwarding
+/*	"dx" is cannot currently be changed after construction.
+	this is a conscious decision to avoid thread issues of stateful functors.
+	I may change this eventually, or provide a thread safe version where it can be changed.
+*/
 
-// for functors that can store state, the question is: should I copy that functors state at the time of dF creation,
-// or should I store a reference to the functor and always act on the most up to date version of it ?
-// I think it makes more sense to make a copy.
-
-// trying to avoid derivative having state so I don't have to worry about threading issues.
-// need to find a way to pass dx to the derivative without it storing it then...
-
-// update: I've decided to store dx in derivative.  the question is, should I allow it to be modified, or keep it constant
-// and if I allow modification, should derivative be thread safe?
-// for the time being, I am going to make it so dx cannot be changed after creation, and see how I like it.
-// if it proves cumbersome, I will likely make derivative thread safe, or perhaps provide a thread safe version.
 
 #include <utility>
 #include <typeinfo>
@@ -53,8 +42,8 @@ namespace math {
 		static_assert(check::vector_space<result_t, field_t>::value,
 					  "Assertion failed, range not a vector space over the domain field");
 		
-		F				_f;
-		field_t const	_dx = infinitesimal_tag{};
+		typename std::decay<F>::type	_f;
+		field_t const					_dx;
 	public:
 		numeric_derivative() = default;
 
@@ -90,25 +79,29 @@ namespace math {
 			}
 		};
 		
-		
-		
-		
-		/* fix up these Args ..., I think they should be Args && ... */
 		template <typename ... Args, int ... S>
 		auto _call(
 			pat::integer_sequence<S ...> s,
-			Args ... a
-		) const -> decltype((_f(a ...) - _f(a ...)) / _dx) {
-			// look up more accurate numeric numeric_derivatives
-			
-			return (_f(if_same<X, S>::_add(a, _dx) ...) - _f(a ...)) / _dx;
+			Args const & ... a
+		) const -> decltype(_f(a ...) / _dx) {
+		
+			// accuracy 4 central finite difference
+			return (  reals_t(1.0/12.0) * _f(if_same<X, S>::_add(a, reals_t(-2) * _dx) ...)
+					- reals_t(2.0/3.0)  * _f(if_same<X, S>::_add(a, -_dx ) ...)
+					+ reals_t(2.0/3.0)  * _f(if_same<X, S>::_add(a, _dx) ...)
+					- reals_t(1.0/12.0) * _f(if_same<X, S>::_add(a, reals_t(2) * _dx) ...)) / _dx;
 		}
 	public:
 		template <typename ... Args>
-		auto operator()(Args ... a) const -> decltype(_call(pat::index_sequence_for<Args ...>{}, a ...)) {
+		auto operator()(Args const & ... a) const -> decltype(_call(pat::index_sequence_for<Args ...>{}, a ...)) {
 			return _call(pat::index_sequence_for<Args ...>{}, a ...);
 		}
 	};
+	
+	template <std::size_t N, typename F>
+	numeric_derivative<F, N> ND(F const & f, typename function_traits<F>::template arg<N> dx = infinitesimal_tag{}) {
+		return numeric_derivative<F, N>(f, dx);
+	}
 	
 	template <typename Functor, std::size_t X>
 	std::ostream & operator << (std::ostream & o, numeric_derivative<Functor,X> const & m) {
