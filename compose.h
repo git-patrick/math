@@ -30,7 +30,7 @@ namespace math {
 	
 	template <typename F, typename G>
 	std::ostream & operator << (std::ostream & o, compose<F,G> const & m) {
-		return o << "comp(" << m.get1() << ", " << m.get2() << ")";
+		return o << "comp(" << m.get1() << "," << m.get2() << ")";
 	}
 }
 
