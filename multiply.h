@@ -17,17 +17,46 @@
 #include "select.h"
 #include "exponential.h"
 #include "trig.h"
+#include "compose.h"
+
 
 namespace math {
 	namespace detail {
+		// SORTING INFORMATION FOR THE BUILT IN FUNCTORS.
+		// These numbers are used to order the terms in a multiplication expression, which is what leads to simplification with powers etc.
+		template <typename T>                       struct __msp                    { static constexpr int value = std::numeric_limits<int>::max(); };
+		template <typename T1, typename T2>         struct __msp<___multiply<T1,T2>>{ static constexpr int value = 0; };
+		
+		template <typename T, typename N>           struct __msp<__pow<T,N>>        { static constexpr int value = __msp<T>::value; };
+		template <typename F, typename ... G>       struct __msp<compose<F,G...>>   { static constexpr int value = __msp<F>::value; };
+		   
+		template <std::intmax_t N, std::intmax_t D> struct __msp<rational<N,D>>     { static constexpr int value = 1; };
+		template <typename R, typename I>           struct __msp<complex<R,I>>      { static constexpr int value = 2; };
+		
+		template <std::size_t N>                    struct __msp<select<N>>         { static constexpr int value = 3 + N; };
+		
+		template <typename T>                       struct __msp<__exp<T>>          { static constexpr int value = 10000; };
+		template <typename T>                       struct __msp<__ln<T>>           { static constexpr int value = 10001; };
+		template <typename T>                       struct __msp<__sin<T>>          { static constexpr int value = 10002; };
+		template <typename T>                       struct __msp<__cos<T>>          { static constexpr int value = 10003; };
+		template <typename T>                       struct __msp<__tan<T>>          { static constexpr int value = 10004; };
+		template <typename T>                       struct __msp<__asin<T>>         { static constexpr int value = 10005; };
+		template <typename T>                       struct __msp<__acos<T>>         { static constexpr int value = 10006; };
+		template <typename T>                       struct __msp<__atan<T>>         { static constexpr int value = 10007; };
+		
+		template <typename T1, typename T2>
+		constexpr int multiply_sort() { return __msp<T1>::value < __msp<T2>::value; }
+	
+	
+	
+	
+	
 		template <typename F, typename G>
 		struct ___multiply {
 		private:
 			F _f;
 			G _g;
 		public:
-			static constexpr int multiply_sort_priority = get_multiply_sort_priority<G>::value;
-			
 			F get1() const { return _f; }
 			G get2() const { return _g; }
 			
@@ -160,10 +189,10 @@ namespace math {
 		};
 		
 		// REPAIR MULTIPLY CHAIN STRUCTURE
-		template <typename T1, typename T2, typename T3>
+	/*	template <typename T1, typename T2, typename T3>
 		struct __multiply<T1, ___multiply<T2, T3>, mp_repair> {
 			template <typename _T = T1> using type = multiply<___multiply<T2, T3>, _T>;
-		};
+		}; */
 		template <typename F, typename G, typename H, typename J>
 		struct __multiply<___multiply<F, G>, ___multiply<H, J>, mp_repair> {
 			template <typename A = F> using type = multiply<A,G,H,J>;
@@ -270,7 +299,7 @@ namespace math {
 	
 	template <typename F, typename G>
 	std::ostream & operator << (std::ostream & o, detail::___multiply<F,G> const & m) {
-		return o << m.get1() << " * " << m.get2();
+		return o << "(" << m.get1() << " * " << m.get2() << ")";
 	}
 }
 

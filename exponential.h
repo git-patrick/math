@@ -18,8 +18,6 @@ namespace math {
 		private:
 			X _x;
 		public:
-			static constexpr int multiply_sort_priority = 4;
-			
 			X get() const { return _x; }
 			
 			template <typename ... Args>
@@ -33,8 +31,6 @@ namespace math {
 		private:
 			X _x;
 		public:
-			static constexpr int multiply_sort_priority = 5;
-			
 			X get() const { return _x; }
 			
 			template <typename ... Args>
@@ -86,8 +82,6 @@ namespace math {
 			X _x;
 			N _n;
 		public:
-			static constexpr int multiply_sort_priority = get_multiply_sort_priority<X>::value;
-			
 			X get1() const { return _x; }
 			N get2() const { return _n; }
 				

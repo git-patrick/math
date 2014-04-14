@@ -32,8 +32,6 @@ namespace math {
 		}
 		
 	public:
-		static constexpr int multiply_sort_priority = get_multiply_sort_priority<F>::value;
-		
 		F  get1() const { return _f; }
 		_G get2() const { return _g; }
 		
