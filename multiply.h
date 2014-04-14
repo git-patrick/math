@@ -2,12 +2,14 @@
 //  multiply.h
 //  math
 //
-//  Created by Patrick Sauter on 4/6/14.
+//  Created by Patrick Sauter on 4/13/14.
 //  Copyright (c) 2014 Patrick Sauter. All rights reserved.
 //
 
 #ifndef math_multiply_h
 #define math_multiply_h
+
+#include <limits>
 
 #include "predeclarations.h"
 #include "add.h"
@@ -15,7 +17,6 @@
 #include "select.h"
 #include "exponential.h"
 #include "trig.h"
-#include "multiply_macros.h"
 
 namespace math {
 	namespace detail {
@@ -25,6 +26,8 @@ namespace math {
 			F _f;
 			G _g;
 		public:
+			static constexpr int multiply_sort_priority = get_multiply_sort_priority<G>::value;
+			
 			F get1() const { return _f; }
 			G get2() const { return _g; }
 			
@@ -35,20 +38,21 @@ namespace math {
 		};
 		
 		enum __multiply_priority {
-			mp_maximum  = 6,
+			mp_maximum  = 7,
 			mp_rational = mp_maximum,
 			mp_complex  = mp_rational - 1,
-			mp_simplify = mp_complex - 1,
+			mp_repair   = mp_complex - 1,
+			mp_simplify = mp_repair - 1,
 			mp_pow      = mp_simplify - 1,
 			mp_sort     = mp_pow - 1,
 			mp_lowest   = mp_sort - 1
 		};
-			
+		
 		// this object ultimately contains the ___multiply type we want after the mathematical simplification / order adjustments to allow simplification
 		// the purpose of the int X is to allow partial specializations that would otherwise be ambiguous to NOT be ambiguous if X1 != X2
 		// if the specialization would match in terms of T and U, it will choose the template with LARGER X first.
 		// the lowest you can set X and still have the template considered is 1.
-		template <typename T, typename U, int X>
+		template <typename T1, typename T2, int Priority>
 		struct __multiply;
 
 		// LOWEST PRIORITY IS ASSUMED SIMPLIFIED BY STAGES ABOVE IT
@@ -66,6 +70,7 @@ namespace math {
 			template <typename __T = T> using type = ___multiply<__T,U>;
 		};
 		
+		
 		template <typename T, typename U, int X>
 		struct _multiply;
 		template <typename T, typename U>
@@ -73,8 +78,10 @@ namespace math {
 		
 		template <typename T, typename U, int X>
 		struct _multiply {
-			template <typename G, typename H, int Y> static typename __multiply<G,H,Y>::template type<> test(typename __multiply<G,H,Y>::template type<>* a);
-			template <typename G, typename H, int Y> static typename _multiply<G,H,Y-1>::template type<> test(...);
+			template <typename G, typename H, int Y> static typename __multiply<G,H,Y>::template type<>
+				test(typename __multiply<G,H,Y>::template type<>* a);
+			template <typename G, typename H, int Y> static typename _multiply<G,H,Y-1>::template type<>
+				test(...);
 
 			template <typename G=T>
 			using type = decltype(test<G,U,X>(0));
@@ -90,11 +97,22 @@ namespace math {
 		struct _split_mult<T, U, More ...> : _split_mult<typename _multiply<T, U, mp_maximum>::template type<>, More ...> { };
 	}
 
-	// this is the only interface from this header.
 //	template <typename ... Args>
 //	using multiply = typename detail::_split_mult<Args ...>::template type<>;
 
+	template <typename F>
+	using negate = multiply<rational<-1>, F>;
+	
+	template <typename X>
+	using inverse = pow<X, rational<-1>>;
+	
+	template <typename X, typename Y>
+	using divide = multiply<X, inverse<Y>>;
+	
 	namespace detail {
+		template <typename T1, typename T2, int P>
+		struct __multiply;
+		
 		// The purpose of all of the following is to simplify (at compile time) the passed mathematical expression.
 		// so, for example...
 		//		multiply<rational<3>,x,exp<y>,x,exp<x>,rational<2>>
@@ -141,10 +159,24 @@ namespace math {
 			template <typename __T = F> using type = F;
 		};
 		
+		// REPAIR MULTIPLY CHAIN STRUCTURE
+		template <typename T1, typename T2, typename T3>
+		struct __multiply<T1, ___multiply<T2, T3>, mp_repair> {
+			template <typename _T = T1> using type = multiply<___multiply<T2, T3>, _T>;
+		};
+		template <typename F, typename G, typename H, typename J>
+		struct __multiply<___multiply<F, G>, ___multiply<H, J>, mp_repair> {
+			template <typename A = F> using type = multiply<A,G,H,J>;
+		};
 		
 		// SIMPLIFICATIONS
-
 		
+		// distribute over addition!
+		template <typename F, typename H, typename J>
+		struct __multiply<F, ___add<H, J>, mp_simplify> {
+			template <typename A = F> using type = ___add<multiply<A,H>, multiply<A,J>>;
+		};
+				
 		// constant multiplication
 		template <std::intmax_t N1, std::intmax_t D1, std::intmax_t N2, std::intmax_t D2>
 		struct __multiply<rational<N1,D1>, rational<N2,D2>, mp_simplify> {
@@ -181,24 +213,16 @@ namespace math {
 			template <typename T = F> using type = ___multiply<H, __pow<T,add<N1, N2>>>;
 		};
 		
-		// trig
-		template <typename F>
-		struct __multiply<__sin<F>, __pow<__cos<F>, rational<-1>>, mp_simplify> {
-			template <typename T = F> using type = __tan<T>;
-		};
-		template <typename H, typename F>
-		struct __multiply<___multiply<H, __sin<F>>, __pow<__cos<F>, rational<-1>>, mp_simplify> {
-			template <typename T = F> using type = ___multiply<H, __tan<T>>;
-		};
-		
-		
 		// SIMPLIFICATION STAGE 2 - POWER COMBINATION
 		
 		template <typename F>
 		struct __multiply<F, F, mp_pow> {
 			template <typename T = F> using type = __pow<T, rational<2>>;
 		};
-
+		template <typename F, typename N1, typename N2>
+		struct __multiply<__pow<F,N1>, __pow<F,N2>, mp_pow> {
+			template <typename T = F> using type = __pow<T, add<N1, N2>>;
+		};
 		template <typename F, typename N>
 		struct __multiply<F, __pow<F,N>, mp_pow> {
 			template <typename T = F> using type = __pow<T, add<N, rational<1>>>;
@@ -207,157 +231,42 @@ namespace math {
 		struct __multiply<__pow<F,N>, F, mp_pow> {
 			template <typename T = F> using type = __pow<T, add<N, rational<1>>>;
 		};
-
-		
-		// TERM SORTING!!!!!
-		// these rearrange terms into a defined order to allow the simplification above to naturally occur
-		
-		// To avoid hitting the maximum recursion depth too quickly, the sorting specializations are all at same priority,
-		// and so we need to have NOSWAP conditions which are basically full specializations that prevent the general swappers from being
-		// selected during partial ordering.
-		// makes the implementation a bit uglier than different priorities, but works and should speed compile times if nothing else.
-		
-		// lots of very simliar template partial specializations.  simplest implementation is with macros.
-		
-		_NOSWAPT(rational<N COMMA D>, select<n>, mp_sort, std::size_t n COMMA std::intmax_t N COMMA std::intmax_t D);
-		_NOSWAPT(complex<R COMMA I>,  select<n>, mp_sort, std::size_t n COMMA typename R COMMA typename I);
-		
-		_NOSWAP(select<0>, select<1>, mp_sort);
-		_NOSWAP(select<0>, select<2>, mp_sort);
-		_NOSWAP(select<0>, select<3>, mp_sort);
-		_NOSWAP(select<0>, select<4>, mp_sort);
-		_NOSWAP(select<0>, select<5>, mp_sort);
-		_NOSWAP(select<0>, select<6>, mp_sort);
-		_NOSWAP(select<0>, select<7>, mp_sort);
-		_NOSWAP(select<0>, select<8>, mp_sort);
-		_NOSWAP(select<1>, select<2>, mp_sort);
-		_NOSWAP(select<1>, select<3>, mp_sort);
-		_NOSWAP(select<1>, select<4>, mp_sort);
-		_NOSWAP(select<1>, select<5>, mp_sort);
-		_NOSWAP(select<1>, select<6>, mp_sort);
-		_NOSWAP(select<1>, select<7>, mp_sort);
-		_NOSWAP(select<1>, select<8>, mp_sort);
-		_NOSWAP(select<2>, select<3>, mp_sort);
-		_NOSWAP(select<2>, select<4>, mp_sort);
-		_NOSWAP(select<2>, select<5>, mp_sort);
-		_NOSWAP(select<2>, select<6>, mp_sort);
-		_NOSWAP(select<2>, select<7>, mp_sort);
-		_NOSWAP(select<2>, select<8>, mp_sort);
-		_NOSWAP(select<3>, select<4>, mp_sort);
-		_NOSWAP(select<3>, select<5>, mp_sort);
-		_NOSWAP(select<3>, select<6>, mp_sort);
-		_NOSWAP(select<3>, select<7>, mp_sort);
-		_NOSWAP(select<3>, select<8>, mp_sort);
-		_NOSWAP(select<4>, select<5>, mp_sort);
-		_NOSWAP(select<4>, select<6>, mp_sort);
-		_NOSWAP(select<4>, select<7>, mp_sort);
-		_NOSWAP(select<4>, select<8>, mp_sort);
-		_NOSWAP(select<5>, select<6>, mp_sort);
-		_NOSWAP(select<5>, select<7>, mp_sort);
-		_NOSWAP(select<5>, select<8>, mp_sort);
-		_NOSWAP(select<6>, select<7>, mp_sort);
-		_NOSWAP(select<6>, select<8>, mp_sort);
-		_NOSWAP(select<7>, select<8>, mp_sort);
-
-
-		
-		_NOSWAPT(rational<N COMMA D>, __exp<G>, mp_sort, typename G COMMA std::intmax_t N COMMA std::intmax_t D);
-		_NOSWAPT(complex<R COMMA I>,  __exp<G>, mp_sort, typename G COMMA typename R COMMA typename I);
-		_NOSWAPT(select<n>, __exp<G>, mp_sort, std::size_t n COMMA typename G);
-		
-		
-		_NOSWAPT(rational<N COMMA D>, __cos<G>, mp_sort, typename G COMMA std::intmax_t N COMMA std::intmax_t D);
-		_NOSWAPT(complex<R COMMA I>,  __cos<G>, mp_sort, typename G COMMA typename R COMMA typename I);
-		_NOSWAPT(select<n>, __cos<G>, mp_sort, std::size_t n COMMA typename G);
-		_NOSWAPT(__exp<G>,  __cos<H>, mp_sort, typename H COMMA typename G);
-		_NOSWAPT(__cos<G>,  __cos<H>, mp_sort, typename H COMMA typename G);
-		
-		
-		_NOSWAPT(rational<N COMMA D>, __sin<G>, mp_sort, typename G COMMA std::intmax_t N COMMA std::intmax_t D);
-		_NOSWAPT(complex<R COMMA I>,  __sin<G>, mp_sort, typename G COMMA typename R COMMA typename I);
-		_NOSWAPT(select<n>, __sin<G>, mp_sort, std::size_t n COMMA typename G);
-		_NOSWAPT(__exp<G>,  __sin<H>, mp_sort, typename H COMMA typename G);
-		_NOSWAPT(__cos<G>,  __sin<H>, mp_sort, typename H COMMA typename G);
-		_NOSWAPT(__sin<G>,  __sin<H>, mp_sort, typename H COMMA typename G);
-		
-		
-		_NOSWAPT(rational<N COMMA D>, __tan<G>, mp_sort, typename G COMMA std::intmax_t N COMMA std::intmax_t D);
-		_NOSWAPT(complex<R COMMA I>,  __tan<G>, mp_sort, typename G COMMA typename R COMMA typename I);
-		_NOSWAPT(select<n>, __tan<G>, mp_sort, std::size_t n COMMA typename G);
-		_NOSWAPT(__exp<G>,  __tan<H>, mp_sort, typename H COMMA typename G);
-		_NOSWAPT(__cos<G>,  __tan<H>, mp_sort, typename H COMMA typename G);
-		_NOSWAPT(__sin<G>,  __tan<H>, mp_sort, typename H COMMA typename G);
-		_NOSWAPT(__tan<G>,  __tan<H>, mp_sort, typename H COMMA typename G);
-		
-		
-		_NOSWAPT(rational<N COMMA D>, __acos<G>, mp_sort, typename G COMMA std::intmax_t N COMMA std::intmax_t D);
-		_NOSWAPT(complex<R COMMA I>,  __acos<G>, mp_sort, typename G COMMA typename R COMMA typename I);
-		_NOSWAPT(select<n>, __acos<G>, mp_sort, std::size_t n COMMA typename G);
-		_NOSWAPT(__exp<G>,  __acos<H>, mp_sort, typename H COMMA typename G);
-		_NOSWAPT(__cos<G>,  __acos<H>, mp_sort, typename H COMMA typename G);
-		_NOSWAPT(__sin<G>,  __acos<H>, mp_sort, typename H COMMA typename G);
-		_NOSWAPT(__tan<G>,  __acos<H>, mp_sort, typename H COMMA typename G);
-		_NOSWAPT(__acos<G>, __acos<H>, mp_sort, typename H COMMA typename G);
-		
-		
-		_NOSWAPT(rational<N COMMA D>, __asin<G>, mp_sort, typename G COMMA std::intmax_t N COMMA std::intmax_t D);
-		_NOSWAPT(complex<R COMMA I>,  __asin<G>, mp_sort, typename G COMMA typename R COMMA typename I);
-		_NOSWAPT(select<n>, __asin<G>, mp_sort, std::size_t n COMMA typename G);
-		_NOSWAPT(__exp<G>,  __asin<H>, mp_sort, typename H COMMA typename G);
-		_NOSWAPT(__cos<G>,  __asin<H>, mp_sort, typename H COMMA typename G);
-		_NOSWAPT(__sin<G>,  __asin<H>, mp_sort, typename H COMMA typename G);
-		_NOSWAPT(__tan<G>,  __asin<H>, mp_sort, typename H COMMA typename G);
-		_NOSWAPT(__acos<G>, __asin<H>, mp_sort, typename H COMMA typename G);
-		_NOSWAPT(__asin<G>, __asin<H>, mp_sort, typename H COMMA typename G);
-		
-		
-		_NOSWAPT(rational<N COMMA D>, __atan<G>, mp_sort, typename G COMMA std::intmax_t N COMMA std::intmax_t D);
-		_NOSWAPT(complex<R COMMA I>,  __atan<G>, mp_sort, typename G COMMA typename R COMMA typename I);
-		_NOSWAPT(select<n>, __atan<G>, mp_sort, std::size_t n COMMA typename G);
-		_NOSWAPT(__exp<G>,  __atan<H>, mp_sort, typename H COMMA typename G);
-		_NOSWAPT(__cos<G>,  __atan<H>, mp_sort, typename H COMMA typename G);
-		_NOSWAPT(__sin<G>,  __atan<H>, mp_sort, typename H COMMA typename G);
-		_NOSWAPT(__tan<G>,  __atan<H>, mp_sort, typename H COMMA typename G);
-		_NOSWAPT(__acos<G>, __atan<H>, mp_sort, typename H COMMA typename G);
-		_NOSWAPT(__asin<G>, __atan<H>, mp_sort, typename H COMMA typename G);
-		_NOSWAPT(__atan<G>, __atan<H>, mp_sort, typename H COMMA typename G);
-		
 		template <typename T, typename F>
 		struct __multiply<___multiply<T, F>, F, mp_pow> {
 			template <typename A = T> using type = multiply<A, __pow<F, rational<2>>>;
 		};
-		
 		template <typename T, typename F, typename N>
 		struct __multiply<___multiply<T, __pow<F,N>>, F, mp_pow> {
 			template <typename A = T> using type = multiply<A, __pow<F, add<N, rational<1>>>>;
 		};
 		
-		_SWAP(rational<N COMMA D>, mp_sort, COMMA std::intmax_t N COMMA std::intmax_t D);
-		_SWAP(complex <R COMMA I>, mp_sort, COMMA typename R COMMA typename I);
+		
+		// SORTER STRUCT, USED FOR SORTING STAGE BELOW!
+		template <typename T1, typename T2, int S>
+		struct __multiply_sorter {
+			template <typename _T = T1> using type = ___multiply<_T, T2>;
+		};
+		template <typename T1, typename T2>
+		struct __multiply_sorter<T1, T2, 0> {
+			template <typename _T = T1> using type = multiply<T2, _T>;
+		};
+		template <typename T1, typename T2, typename T3, int S>
+		struct __multiply_sorter<___multiply<T1, T2>, T3, S> {
+			template <typename _T = T1> using type = ___multiply<___multiply<_T, T2>, T3>;
+		};
+		template <typename T1, typename T2, typename T3>
+		struct __multiply_sorter<___multiply<T1, T2>, T3, 0> {
+			template <typename _T = T1> using type = multiply<multiply<_T, T3>, T2>;
+		};
+		
 
-		_SWAP(select<n>, mp_sort, COMMA std::size_t n);
-		_SWAP(__exp<G>,  mp_sort, COMMA typename G);
-		_SWAP(__cos<G>,  mp_sort, COMMA typename G);
-		_SWAP(__sin<G>,  mp_sort, COMMA typename G);
-		_SWAP(__tan<G>,  mp_sort, COMMA typename G);
-		_SWAP(__acos<G>, mp_sort, COMMA typename G);
-		_SWAP(__asin<G>, mp_sort, COMMA typename G);
-		_SWAP(__atan<G>, mp_sort, COMMA typename G);
-		
-		// associativity of multiplication
-		template <typename F, typename G, typename H, typename J>
-		struct __multiply<___multiply<F, G>, ___multiply<H, J>, mp_simplify> {
-			template <typename A = F> using type = multiply<A,G,H,J>;
-		};
-		
-		// get us into standard orientation for further simplification
-		template <typename F, typename H, typename J>
-		struct __multiply<F, ___multiply<H, J>, mp_sort> {
-			template <typename A = F> using type = multiply<___multiply<H, J>, A>;
-		};
-		
+		// SORT OUR FUNCTORS TO MAKE SIMPLIFICATIONS HAPPEN!
+		template <typename T1, typename T2, typename T3>
+		struct __multiply<___multiply<T1, T2>, T3, mp_sort> : __multiply_sorter<___multiply<T1, T2>, T3, multiply_sort<T2,T3>()> { };
+
+		template <typename T1, typename T2>
+		struct __multiply<T1, T2, mp_sort> :  __multiply_sorter<T1, T2, multiply_sort<T1,T2>()> { };
 	}
-	
 	
 	template <typename F, typename G>
 	std::ostream & operator << (std::ostream & o, detail::___multiply<F,G> const & m) {

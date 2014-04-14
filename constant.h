@@ -15,6 +15,8 @@
 namespace math {
 	template <std::intmax_t N, std::intmax_t D = 1>
 	struct rational : std::ratio<N, D> {
+		static constexpr int multiply_sort_priority = 1;
+	
 		template <typename ... Args>
 		reals_t operator()(Args ... a) const {
 			return reals_t(rational::num) / rational::den;
@@ -70,6 +72,8 @@ namespace math {
 
 	template <typename R1, typename R2>
 	struct complex {
+		static constexpr int multiply_sort_priority = 2;
+		
 		typedef R1 real;
 		typedef R2 imag;
 		

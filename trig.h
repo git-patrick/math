@@ -15,6 +15,8 @@ namespace math {
 	private:
 		X _x;
 	public:
+		static constexpr int multiply_sort_priority = 6;
+		
 		X get() const { return _x; }
 		
 		template <typename ... Args>
@@ -28,6 +30,8 @@ namespace math {
 	private:
 		X _x;
 	public:
+		static constexpr int multiply_sort_priority = 7;
+		
 		X get() const { return _x; }
 		
 		template <typename ... Args>
@@ -69,6 +73,8 @@ namespace math {
 	private:
 		X _x;
 	public:
+		static constexpr int multiply_sort_priority = 8;
+		
 		X get() const { return _x; }
 		
 		template <typename ... Args>
@@ -82,6 +88,8 @@ namespace math {
 	private:
 		X _x;
 	public:
+		static constexpr int multiply_sort_priority = 9;
+		
 		X get() const { return _x; }
 		
 		template <typename ... Args>
@@ -123,6 +131,8 @@ namespace math {
 	private:
 		X _x;
 	public:
+		static constexpr int multiply_sort_priority = 10;
+		
 		X get() const { return _x; }
 		
 		template <typename ... Args>
@@ -136,6 +146,8 @@ namespace math {
 	private:
 		X _x;
 	public:
+		static constexpr int multiply_sort_priority = 11;
+		
 		X get() const { return _x; }
 		
 		template <typename ... Args>

@@ -12,6 +12,8 @@
 // useful for composing arbitrary functors with analytic functions.
 // derivative specializations allow the analytic portion to be compile time calculated
 
+#include "predeclarations.h"
+
 #include <tuple>
 #include "tuple_help.h"
 
@@ -30,6 +32,8 @@ namespace math {
 		}
 		
 	public:
+		static constexpr int multiply_sort_priority = get_multiply_sort_priority<F>::value;
+		
 		F  get1() const { return _f; }
 		_G get2() const { return _g; }
 		
@@ -43,8 +47,8 @@ namespace math {
 		template <typename ... G, int ... S>
 		std::ostream & print_tuple(std::ostream & o, std::tuple<G ...> const & tup, pat::integer_sequence<S ...>) {
 			using swallow = int[];
-			
-			void(swallow{ 0, ((o << (S == 0 ? "" : ", ") << std::get<S>(tup)), 0) ... });
+
+			void(swallow{ ((o << (S == 0 ? "" : ", ") << std::get<S>(tup)), 0) ... });
 			
 			return o;
 		}

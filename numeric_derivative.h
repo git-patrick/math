@@ -84,6 +84,34 @@ namespace math {
 			}
 		};
 		
+		/*
+			want to add support for higher order numerical derivatives using the same central difference technique
+		
+		template <typename ... S>
+		struct _sequence { };
+		
+		template <typename ... Rationals, typename ... Args, int ... S, int ... SR, int ... dx>
+		auto _call(
+			Args const & ... args,
+			pat::integer_sequence<S ...> s,		// integer sequence from 0 - #args - 1
+			_sequence<Rationals ...>,			// coefficients for the central difference sum
+			pat::integer_sequence<SR ...>,		// integer sequence from 0 - #Rationals - 1
+			pat::integer_sequence<dx ...>		// integer sequence for the dx multipler (-2 ... 2) for example, sizeof...(dx) == sizeof...(coefficients)
+		) const -> decltype(_f(args ...) / _dx) {
+			add<
+				multiply<
+					Rational,
+					compose<functor_t, add_if_same<X, S> ...>> multiply<rational<dx>,
+			
+			// accuracy 4 central finite difference
+			return (  rational<1,12>()() * _f(if_same<X, S>::_add(args, rational<-2>()() * _dx) ...)
+					- rational<2,3>()()  * _f(if_same<X, S>::_add(args, -_dx ) ...)
+					+ rational<2,3>()()  * _f(if_same<X, S>::_add(args, _dx) ...)
+					- rational<1,12>()() * _f(if_same<X, S>::_add(args, reals_t(2) * _dx) ...)) / _dx;
+		}
+		
+		*/
+		
 		template <int ... S, typename ... Args>
 		auto _call(
 			pat::integer_sequence<S ...> s,

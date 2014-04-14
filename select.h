@@ -27,6 +27,8 @@ namespace math {
 			typename std::decay<T>::type const & value;
 		};
 	public:
+		static constexpr int multiply_sort_priority = 3;
+		
 		template <typename ... Args>
 		auto operator()(Args && ... a) const -> decltype(_select<N, Args ...>(a ...).value) {
 			return _select<N, Args ...>(a ...).value;

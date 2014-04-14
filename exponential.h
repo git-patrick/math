@@ -9,6 +9,8 @@
 #ifndef math_exponential_h
 #define math_exponential_h
 
+#include "multiply.h"
+
 namespace math {
 	namespace detail {
 		template <typename X>
@@ -16,6 +18,8 @@ namespace math {
 		private:
 			X _x;
 		public:
+			static constexpr int multiply_sort_priority = 4;
+			
 			X get() const { return _x; }
 			
 			template <typename ... Args>
@@ -29,6 +33,8 @@ namespace math {
 		private:
 			X _x;
 		public:
+			static constexpr int multiply_sort_priority = 5;
+			
 			X get() const { return _x; }
 			
 			template <typename ... Args>
@@ -80,6 +86,8 @@ namespace math {
 			X _x;
 			N _n;
 		public:
+			static constexpr int multiply_sort_priority = get_multiply_sort_priority<X>::value;
+			
 			X get1() const { return _x; }
 			N get2() const { return _n; }
 				
@@ -113,10 +121,10 @@ namespace math {
 	
 	template <typename X, typename N>
 	using pow = typename detail::_pow<X,N>::type;
-	
+		
 	template <typename F, typename G>
 	std::ostream & operator << (std::ostream & o, detail::__pow<F,G> const & m) {
-		return o << m.get1() << "^" << m.get2();
+		return o << "(" << m.get1() << ")" << "^" << m.get2();
 	}
 	
 	template <typename F>

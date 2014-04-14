@@ -57,13 +57,13 @@ int main(int argc, const char * argv[])
 		<< "COMPILE TIME EXPRESSION SIMPLIFICATION" << std::endl
 		<< "    " << multiply<rational<0>, add<x,x>>() << std::endl
 		<< "    " << multiply<add<x,x>, add<x,x>>() << std::endl
-		<< "    " << multiply<rational<3,2>, x, complex<rational<3>,rational<1>>, x, x, x, exp<y>, sin<z>, exp<x>>() << std::endl
+		<< "    " << multiply<rational<3,2>, x, complex<rational<3>,rational<1>>, x, x, x, exp<y>, sin<z>, exp<x>, sin<z>, sin<z>>() << std::endl
 		<< "    " << multiply<exp<x>, x, exp<y>, compose<arbitrary_functor2, add<x,y>>>() << std::endl << std::endl
 	;
 	
 	std::cout
 		<< "EXACT COMPILE TIME DIFFERENTIATION" << std::endl
-		<< "    " << D<multiply<add<x,y>,z>, x>() << std::endl		// derivative of (x + y) * z with respect to x
+		<< "    " << D<D<multiply<add<pow<x,rational<3>>,y>,z>, x>,x>() << std::endl
 		<< "    " << D<multiply<rational<3,2>, x, complex<rational<3>,rational<1>>, x, x, x, exp<y>, sin<z>, exp<x>>, x>() << std::endl << std::endl
 	;
 	

@@ -37,6 +37,7 @@ namespace math {
 	// default behavior assumes you have inherited from math::function, or created the typedef's and templates yourself.
 	template<typename T>
 	struct function_traits {
+	public:
 		static constexpr size_t arity = T::arity;
 		
 		typedef typename T::result_type result_type;
