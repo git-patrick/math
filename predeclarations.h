@@ -13,9 +13,6 @@
 
 namespace math {
 	namespace detail {
-		template <typename F>
-		struct __msp;
-		
 		// ultimately the functor that will be getting called.
 		template <typename F, typename G>
 		struct ___multiply;
@@ -57,49 +54,41 @@ namespace math {
 				Args ...
 			>;
 	//	>;
-
-	
-/*	template <typename ... Args>
-	using multiply = pat::tmp::sort<detail::__msp, simplify, Args ...>;
-*/
-	/* --- Alternative syntax if I wrap everything in a tuple... -------
-	
-	template <template <typename, typename> class compact, template <typename, typename> class split, typename Tuple>
-	struct _binary_apply;
-	
-	template <template <typename, typename> class compact, template <typename, typename> class split, typename ... Args>
-	struct _binary_apply<compact, split, std::tuple<Args ...>> {
-		typedef
-			binary_compact<
-				compact,
-				binary_split<
-					split,
-					Args ...
-				>
-			>
-			type;
-	};
-	
-	template <template <typename, typename> class compact, template <typename, typename> class split, typename Tuple>
-	using binary_apply = typename _binary_apply<compact, split, Tuple>::type;
-
-	template <typename ... Args>
-	using multiply = simplify<detail::__multiply, sort<detail::__msp, std::tuple<Args ...>>>;
-	
-	template <typename
-	
-		
-	*/
 	
 	namespace detail {
 		template <typename F, typename G>
 		struct ___add;
 		
-		template <typename ... Args>
-		struct _split_add;
+		template <typename T, typename U, int X>
+		struct __add;
+		
+		enum __add_priority {
+			ap_maximum  = 6,
+			ap_zeroes   = ap_maximum,
+			ap_fields   = ap_zeroes - 1,
+			ap_general  = ap_fields - 1,
+			ap_lowest   = 1
+		};
+		
+		template <typename T1, typename T2>
+		struct find__add {
+			template <int Y> using action = typename __add<T1, T2, Y>::type;
+		};
+
+		template <typename T1, typename T2>
+		using _add = pat::tmp::for_loop<ap_maximum, find__add<T1,T2>::template action, pat::tmp::dec>;
 	}
+	
 	template <typename ... Args>
-	using add = typename detail::_split_add<Args ...>::template type<>;
+	using add =
+	//	pat::tmp::binary_compact<
+	//		detail::___add,
+	//		detail::add_t,
+			pat::tmp::binary_split<
+				detail::_add,
+				Args ...
+			>;
+	//	>;
 }
 
 #endif
