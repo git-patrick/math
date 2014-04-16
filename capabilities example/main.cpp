@@ -9,6 +9,7 @@
 #include <iostream>
 #include "analytic.h"
 #include "derivative.h"
+#include "tuple_help.h"
 
 #define trace()
 class arbitrary_functor : public math::function<double(double, double)> {
@@ -76,7 +77,7 @@ int main(int argc, const char * argv[])
 	std::cout
 		<< "MIXING EXACT COMPILE TIME DERIVATIVES WITH NUMERIC DERIVATIVES OF ARBITRARY FUNCTORS" << std::endl
 		<< "    " << D<multiply<exp<x>, x, exp<y>, arbitrary_functor>, x>() << std::endl
-		<< "    " << D<multiply<compose<arbitrary_functor2, multiply<x,x>>>,x>() << std::endl << std::endl
+		<< "    " << D<compose<arbitrary_functor2, multiply<x,x>>,x>() << std::endl << std::endl
 	;
 	
 	std::cout

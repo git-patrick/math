@@ -6,8 +6,8 @@
 //  Copyright (c) 2014 Patrick Sauter. All rights reserved.
 //
 
-#ifndef math_tuple_help_h
-#define math_tuple_help_h
+#ifndef _pat_tuple_help_h
+#define _pat_tuple_help_h
 
 // this includes some tuple helper stuff.
 
@@ -65,6 +65,15 @@ namespace pat {
 			index_sequence_for<Args ...>,
 			std::tuple<Args ...>
 		> { };
+			
+	template <typename ... G, int ... S>
+	std::ostream & print_tuple(std::ostream & o, std::tuple<G ...> const & tup, pat::integer_sequence<S ...>) {
+		using swallow = int[];
+
+		void(swallow{ ((o << (S == 0 ? "" : ", ") << std::get<S>(tup)), 0) ... });
+		
+		return o;
+	}
 }
 
 #endif

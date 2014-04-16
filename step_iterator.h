@@ -6,8 +6,8 @@
 //  Copyright (c) 2014 Patrick Sauter. All rights reserved.
 //
 
-#ifndef math_step_iterator_h
-#define math_step_iterator_h
+#ifndef _pat_step_iterator_h
+#define _pat_step_iterator_h
 
 #include <boost/iterator/iterator_adaptor.hpp>
 

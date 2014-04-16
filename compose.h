@@ -41,20 +41,9 @@ namespace math {
 		}
 	};
 	
-	namespace detail {
-		template <typename ... G, int ... S>
-		std::ostream & print_tuple(std::ostream & o, std::tuple<G ...> const & tup, pat::integer_sequence<S ...>) {
-			using swallow = int[];
-
-			void(swallow{ ((o << (S == 0 ? "" : ", ") << std::get<S>(tup)), 0) ... });
-			
-			return o;
-		}
-	}
-	
-	template <typename ... G>
-	std::ostream & operator << (std::ostream & o, std::tuple<G ...> const & m) {
-		return detail::print_tuple(o, m, pat::index_sequence_for<G ...>{});
+	template <typename ... H>
+	std::ostream & operator << (std::ostream & o, std::tuple<H ...> const & m) {
+		return print_tuple(o, m, pat::index_sequence_for<H ...>{});
 	}
 	
 	template <typename F, typename ... G>

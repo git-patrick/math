@@ -1,5 +1,5 @@
-#ifndef _iterator_h
-#define _iterator_h
+#ifndef _pat_iterator_h
+#define _pat_iterator_h
 
 #include <iterator>
 

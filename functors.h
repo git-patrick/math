@@ -6,8 +6,8 @@
 //  Copyright (c) 2014 Patrick Sauter. All rights reserved.
 //
 
-#ifndef math_functors_h
-#define math_functors_h
+#ifndef _pat_functors_h
+#define _pat_functors_h
 
 namespace pat {
 	template <typename To>

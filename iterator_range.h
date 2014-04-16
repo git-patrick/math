@@ -6,8 +6,8 @@
 //  Copyright (c) 2014 Patrick Sauter. All rights reserved.
 //
 
-#ifndef math_range_container_h
-#define math_range_container_h
+#ifndef _pat_iterator_range_h
+#define _pat_iterator_range_h
 
 // boost has this concept already.  I will be switching shortly.
 

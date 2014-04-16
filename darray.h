@@ -5,8 +5,8 @@
 //  Copyright (c) 2014 Patrick Sauter. All rights reserved.
 //
 
-#ifndef __darray__
-#define __darray__
+#ifndef _pat_darray_
+#define _pat_darray_
 
 #include <iterator>
 #include <algorithm>

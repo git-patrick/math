@@ -114,19 +114,6 @@ namespace math {
 		>
 	>;
 	
-	template <typename C1, typename C2>
-	struct _complex_multiply {
-		typedef complex<
-			rational_add<
-				rational_multiply<typename C1::real, typename C2::real>,
-				rational_multiply<rational<-1>, rational_multiply<typename C1::imag, typename C2::imag>>
-			>,
-			rational_add<
-				rational_multiply<typename C1::real, typename C2::imag>,
-				rational_multiply<typename C1::imag, typename C2::real>
-			>
-		> type;
-	};
 
 	template <typename C1, typename C2>
 	struct _complex_divide {
