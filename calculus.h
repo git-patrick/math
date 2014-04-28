@@ -6,5 +6,5 @@
 //  Copyright (c) 2014 Patrick Sauter. All rights reserved.
 //
 
-#include "derivative.h"
-#include "integral.h"
+#include "numeric_integral.h"
+#include "numeric_derivative.h"

@@ -1,3 +1,11 @@
+CHANGE THE WAY I HANDLE NEGATE AND SUBTRACTION.  I am thinking negate will be a tag that allows add simplification.
+It allows a specialization in ___add where the second is a negate to just subtract instead similar to multiplication by x^(-1)
+becoming division
+
+I could also have negate move out of multiplication, be its own inverse, and that will fix up the bessel implementation
+
+
+
 compile time indefinite intregrals of analytic functions!
 additional analytic expression simplification rules (in particular, add and sub need work)
 

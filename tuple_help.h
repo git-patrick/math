@@ -18,22 +18,44 @@ namespace pat {
 	};
 
 	namespace detail {
-		template <int N, int ... S>
-		struct gen : gen<N - 1, N - 1, S ...> {
+		template <int A, int N, int ... S>
+		struct gen : gen<A, N - 1, N - 1, S ...> {
 
 		};
-		template <int ... S>
-		struct gen<0, S ...> {
-			typedef integer_sequence<S ...> type;
+		template <int A, int ... S>
+		struct gen<A, 0, S ...> {
+			typedef integer_sequence<S + A ...> type;
 		};
 	}
 	
 	template <typename ... Types>
-	using index_sequence_for = typename detail::gen<sizeof...(Types)>::type;
+	using index_sequence_for = typename detail::gen<0, sizeof...(Types)>::type;
 	
-	template <std::size_t N>
-	using sequence_to = typename detail::gen<N>::type;
+	template <std::size_t From, std::size_t To>
+	using sequence = typename detail::gen<From, To - From + 1>::type;
 	
+	namespace detail {
+		template <int B, int ... M2>
+		constexpr int _lex_lessequalthan(integer_sequence<>, integer_sequence<B, M2 ...>) {
+			return 1;
+		}
+		constexpr int _lex_lessequalthan(integer_sequence<>, integer_sequence<>) {
+			return 1;
+		}
+		template <int A, int ... M1>
+		constexpr int _lex_lessequalthan(integer_sequence<A, M1 ...>, integer_sequence<>) {
+			return 0;
+		}
+		template <int A, int B, int ... M1, int ... M2>
+		constexpr int _lex_lessequalthan(integer_sequence<A, M1 ...>, integer_sequence<B, M2 ...>) {
+			return (A > B ? 0 : (A < B ? 1 : _lex_lessequalthan(integer_sequence<M1 ...>(), integer_sequence<M2 ...>())));
+		}
+	}
+	
+	template <typename T1, typename T2>
+	constexpr int sequence_lex_lessequalthan() {
+		return detail::_lex_lessequalthan(T1(), T2());
+	}
 	
 	namespace detail {
 		template <std::size_t C, std::size_t I, typename T, typename ... Args>

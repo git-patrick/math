@@ -48,7 +48,7 @@ namespace math {
 	}
 	
 	template <typename Function, typename Measure, typename Container>
-	auto integrate(Function f, Measure mu, Container set_container) -> decltype(f(*set_container.begin())) {
+	auto numeric_integral(Function f, Measure mu, Container set_container) -> decltype(f(*set_container.begin())) {
 		static_assert(check::vector_space<decltype(f(*set_container.begin())), reals_t>::value,
 					  "Assertion failed, return type not a vector space over the reals.");
 		

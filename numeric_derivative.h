@@ -107,10 +107,12 @@ namespace math {
 			return (  rational<1,12>()() * _f(if_same<X, S>::_add(args, rational<-2>()() * _dx) ...)
 					- rational<2,3>()()  * _f(if_same<X, S>::_add(args, -_dx ) ...)
 					+ rational<2,3>()()  * _f(if_same<X, S>::_add(args, _dx) ...)
-					- rational<1,12>()() * _f(if_same<X, S>::_add(args, reals_t(2) * _dx) ...)) / _dx;
+					- rational<1,12>()() * _f(if_same<X, S>::_add(args, rational<2>()() * _dx) ...)) / _dx;
 		}
 		
 		*/
+		
+		
 		
 		template <int ... S, typename ... Args>
 		auto _call(
@@ -118,10 +120,10 @@ namespace math {
 			Args const & ... a
 		) const -> decltype(_f(a ...) / _dx) {
 			// accuracy 4 central finite difference first order derivative
-			return (  reals_t(1.0/12.0) * _f(if_same<X, S>::_add(a, reals_t(-2) * _dx) ...)
-					- reals_t(2.0/3.0)  * _f(if_same<X, S>::_add(a, -_dx ) ...)
-					+ reals_t(2.0/3.0)  * _f(if_same<X, S>::_add(a, _dx) ...)
-					- reals_t(1.0/12.0) * _f(if_same<X, S>::_add(a, reals_t(2) * _dx) ...)) / _dx;
+		return (  reals_t(1) / 12 * _f(if_same<X, S>::_add(a, reals_t(-2) * _dx) ...)
+				- reals_t(2) / 3  * _f(if_same<X, S>::_add(a, -_dx ) ...)
+				+ reals_t(2) / 3  * _f(if_same<X, S>::_add(a, _dx) ...)
+				- reals_t(1) / 12 * _f(if_same<X, S>::_add(a, reals_t(2) * _dx) ...)) / _dx;
 		}
 	public:
 		template <typename ... Args>

@@ -22,25 +22,27 @@ namespace pat {
 				typedef T result;
 			};
 			template <template <typename, typename> class Operator, typename T, typename U, typename ... More>
-			struct _binary_split<Operator, T, U, More ...> : _binary_split<Operator, Operator<T, U>, More ...> { };
+			struct _binary_split<Operator, T, U, More ...> {
+				typedef Operator<T, typename _binary_split<Operator, U, More ...>::result> result;
+			};
 		}
 
 		// SPLITS VARARGS INTO A SEQUENCE OF BINARY OP CALLS
-		// ie, binary_split<multiply, a,b,c,d> == multiply<multiply<multiply<a,b>,c>,d>
+		// ie, binary_split<multiply, a,b,c,d> == multiply<a, multiply<b, multiply<c,d>>>
 		
 		template <template <typename, typename> class Operator, typename ... Args>
 		using binary_split = typename detail::_binary_split<Operator, Args ...>::result;
 		
-			
+		
 		
 		namespace detail {
 			template <typename ... Args>
 			struct __append {
 				typedef __append type;
 			};
-			template <typename ... Args1, typename ... Args2>
-			struct __append<__append<Args1 ...>, Args2 ...> {
-				typedef __append<Args1 ..., Args2 ...> type;
+			template <typename Arg1, typename ... Args2>
+			struct __append<Arg1, __append<Args2 ...>> {
+				typedef __append<Arg1, Args2 ...> type;
 			};
 			template <typename ... Args>
 			using _append = typename __append<Args ...>::type;
@@ -61,12 +63,12 @@ namespace pat {
 			};
 			template <template <typename, typename> class Operator, typename T1, typename T2>
 			struct _devour_operator_chain<Operator, Operator<T1, T2>> {
-				typedef _append<typename _devour_operator_chain<Operator, T1>::result, T2> result;
+				typedef _append<T1, typename _devour_operator_chain<Operator, T2>::result> result;
 			};
 		}
 		
 		// COMPRESSES A SEQUENCE BINARY OP CALLS, AND PASSES THE RESULTING ARGS TO Output TEMPLATE
-		// ie, binary_compact<multiply, Output, multiply<multiply<multiply<a,b>,c>,d>> == Output<a,b,c,d>;
+		// ie, binary_compact<multiply, Output, multiply<a, multiply<b, multiply<c,d>>>> == Output<a,b,c,d>;
 		
 		template <template <typename, typename> class Operator, template <typename ...> class Output, typename T>
 		using binary_compact = typename detail::_devour_append<Output, typename detail::_devour_operator_chain<Operator, T>::result>::result;
@@ -114,6 +116,7 @@ namespace pat {
 			static constexpr int value = X - 1;
 		};
 		
+		
 		// loops until Until<X> is valid (uses SFINAE), then returns it.  uses X = Adjust<X>::value each passthrough.
 		template <int X, template <int> class Until, template <int> class Adjust>
 		using for_loop = typename detail::_for<X, Until, Adjust>::type;
@@ -144,26 +147,26 @@ namespace pat {
 				template <template <typename> class Order> using result = _sorted<T2, T1>;
 			};
 			template <typename T1, typename T2, typename T3, int S>
-			struct _sorter<_sorted<T1, T2>, T3, S> {
-				template <template <typename> class Order> using result = _sorted<_sorted<T1, T2>, T3>;
+			struct _sorter<T1, _sorted<T2, T3>, S> {
+				template <template <typename> class Order> using result = _sorted<T1, _sorted<T2, T3>>;
 			};
 			template <typename T1, typename T2, typename T3>
-			struct _sorter<_sorted<T1, T2>, T3, 0> {
+			struct _sorter<T1, _sorted<T2, T3>, 0> {
 				// mainly templated so I don't have to keep passing ordering down.
 				template <template <typename> class Order> using result =
-					_sorted<typename _sort<Order>::template op<T1, T3>, T2>;
+					_sorted<T2, typename _sort<Order>::template op<T1, T3>>;
 			};
 			
 			template <template <typename> class values, typename T1, typename T2>
-			constexpr int __compare() { return values<T1>::value < values<T2>::value; }
+			constexpr int __compare() { return values<T1>::value <= values<T2>::value; }
 			
 			template <template <typename> class values, typename T1, typename T2>
 			struct _compare {
 				static constexpr int value = __compare<values, T1, T2>();
 			};
 			template <template <typename> class values, typename T1, typename T2, typename T3>
-			struct _compare<values, _sorted<T1,T2>, T3> {
-				static constexpr int value = __compare<values, T2, T3>();
+			struct _compare<values, T1, _sorted<T2, T3>> {
+				static constexpr int value = __compare<values, T1, T2>();
 			};
 			
 			
@@ -184,6 +187,27 @@ namespace pat {
 				Args ...
 			>
 		>;
+		
+		
+		
+		
+		
+		
+		namespace detail {
+			template <std::intmax_t T, std::intmax_t ... N>
+			struct _sum;
+			
+			template <std::intmax_t T, std::intmax_t C, std::intmax_t ... N>
+			struct _sum<T,C,N...> : _sum<T+C, N...> { };
+			
+			template <std::intmax_t T>
+			struct _sum<T> {
+				static constexpr std::intmax_t value = T;
+			};
+		}
+		
+		template <std::intmax_t ... N>
+		using sum = detail::_sum<N...>;
 	}
 }
 

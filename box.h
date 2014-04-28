@@ -36,7 +36,7 @@ namespace math {
 		
 		// when casting the box to a vector, we just return our center (or close to if integral storage)
 		// this is used in integrals
-		explicit operator vector_type() { return _a + diagonal() / 2; }
+		operator vector_type() { return _a + diagonal() / 2; }
 		
 		vector_type		diagonal() const { return _b - _a; }
 		
