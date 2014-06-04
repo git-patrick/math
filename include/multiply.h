@@ -22,12 +22,12 @@ namespace math {
 			template <typename T>                       struct __msp                    { static constexpr int value = std::numeric_limits<int>::max(); };
 			
 			template <typename T, typename N>           struct __msp<___pow<T,N>>       { static constexpr int value = __msp<T>::value; };
-			template <typename F, typename ... G>       struct __msp<compose<F,G...>>   { static constexpr int value = __msp<F>::value; };
+			template <typename F, typename ... G>       struct __msp<pat::compose<F,G...>>{ static constexpr int value = __msp<F>::value; };
 			
 			template <std::intmax_t N, std::intmax_t D, std::intmax_t iN, std::intmax_t iD>
 													    struct __msp<complex<N,D,iN,iD>>{ static constexpr int value = 1; };
 			
-			template <std::size_t N>                    struct __msp<select<N>>         { static constexpr int value = 3 + 2 * N; };
+			template <std::size_t N>                    struct __msp<pat::select<N>>    { static constexpr int value = 3 + 2 * N; };
 			
 			template <typename T>                       struct __msp<__exp<T>>          { static constexpr int value = 10000; };
 			template <typename T>                       struct __msp<__ln<T>>           { static constexpr int value = 10002; };

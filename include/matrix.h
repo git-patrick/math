@@ -21,9 +21,9 @@
 
 #include "core.h"
 
-#include "iterator_range.h"
-#include "step_iterator.h"
-#include "functors.h"
+#include <pat/iterator_range.h>
+#include <pat/step_iterator.h>
+#include <pat/functors.h>
 
 using pat::iterator_range;
 using pat::make_range;

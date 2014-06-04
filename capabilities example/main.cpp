@@ -7,9 +7,10 @@
 //
 
 #include <iostream>
+#include <pat/tuple_help.h>
+
 #include "analytic.h"
 #include "derivative.h"
-#include "tuple_help.h"
 
 #define trace()
 class arbitrary_functor : public math::function<double(double, double)> {
@@ -38,6 +39,7 @@ std::ostream & operator << (std::ostream & o, arbitrary_functor2 const & m) {
 int main(int argc, const char * argv[])
 {
 	using namespace math::analytic;
+	using namespace pat;
 	
 	// Thanks to compiler optimizations, these functors end up as fast as an inline directly created function
 	// performing the same action.
@@ -91,12 +93,5 @@ int main(int argc, const char * argv[])
 		<< "    " << D<compose<arbitrary_functor, pow<x,rational<1,2>>, exp<x>>, x>() << std::endl
 	;
 	
-	std::cout
-		<< "TEST" << std::endl
-		<< "    " << multiply<x,add<x,y>>() << std::endl
-	;
-
-	
     return 0;
 }
-

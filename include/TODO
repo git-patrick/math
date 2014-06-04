@@ -1,18 +1,15 @@
-CHANGE THE WAY I HANDLE NEGATE AND SUBTRACTION.  I am thinking negate will be a tag that allows add simplification.
-It allows a specialization in ___add where the second is a negate to just subtract instead similar to multiplication by x^(-1)
-becoming division
-
-I could also have negate move out of multiplication, be its own inverse, and that will fix up the bessel implementation
-
-
-
+Fix up the derivative.h implementation.  don't need all those aliases.
 compile time indefinite intregrals of analytic functions!
-additional analytic expression simplification rules (in particular, add and sub need work)
+compile time evaluation of functors with constant functor input (ie, exp<rational<3,2>> should evaluate to a rational<...>)
+	the only real way to do this without losing an precision along the way is to come up with a replacement for std::ratio
+	that has better precision than all floating point types that might be used, and use that in math::analytic::complex
+	then I would need to write compile time implementations of all the basic functions ... exp, sin, ln, etc etc...
+	the work required to make this happen might outweigh the benefit though.
+	
+higher order numeric derivatives.
 
 PERMUTATIONS (symmetric group)
-
-TOPOLOGY 
-
+TOPOLOGY
 
 GROUP DIAGRAMS
 FUNCTION PLOTTING
@@ -26,14 +23,10 @@ MIN/MAX FINDER OVER A VOLUME
 OPTIONS FOR MAKING THE NUMERIC INTEGRAL MORE ACCURATE,
 complex integral
 
-
-
 taylor expansion
 
 the infinitesimal values in infinitesimal_tag cast operators were basically pulled out of a hat.
 I need to think about them and choose logically.
-
-think about specializing 1x1 matrices for performance?
 
 	DERIVATIVE / COMPLEX DERIVATIVE X
 	dihedral group  X

@@ -9,7 +9,7 @@
 #ifndef _math_setup_h
 #define _math_setup_h
 
-#include "tmp.h"
+#include <pat/tmp.h>
 
 #include "constant.h"
 #include "select.h"

@@ -23,8 +23,8 @@ namespace math {
 			struct __D;
 			
 			template <typename T, std::size_t N>
-			struct __D<T, select<N>, derivative_numeric_stage> {
-				template <typename __T=T> using type = numeric_derivative<__T, N>;
+			struct __D<T, pat::select<N>, derivative_numeric_stage> {
+				template <typename __T=T> using type = numeric_derivative<__T, 1, N>;
 			};
 			
 			template <typename T, typename U, int X>
@@ -47,17 +47,17 @@ namespace math {
 		
 		namespace detail {
 			template <std::intmax_t N, std::intmax_t D, std::intmax_t iN, std::intmax_t iD, std::size_t A>
-			struct __D<complex<N,D,iN,iD>, select<A>, derivative_analytic_stage> {
+			struct __D<complex<N,D,iN,iD>, pat::select<A>, derivative_analytic_stage> {
 				template <std::intmax_t __T=N> using type = rational<0>;
 			};
 			
 			template <std::size_t A>
-			struct __D<select<A>, select<A>, derivative_analytic_stage> {
+			struct __D<pat::select<A>, pat::select<A>, derivative_analytic_stage> {
 				template <std::size_t __T=A> using type = rational<1>;
 			};
 			
 			template <std::size_t A, std::size_t B>
-			struct __D<select<A>, select<B>, derivative_analytic_stage> {
+			struct __D<pat::select<A>, pat::select<B>, derivative_analytic_stage> {
 				template <std::size_t __T=A> using type = rational<0>;
 			};
 			
@@ -138,14 +138,14 @@ namespace math {
 			
 
 			template <typename F, typename ... G, typename dx>
-			struct __D<compose<F, G ...>, dx, derivative_analytic_stage> {
+			struct __D<pat::compose<F, G ...>, dx, derivative_analytic_stage> {
 			private:
 				template <typename _F, typename S>
 				struct _detail;
 				
 				template <typename _F, int ... S>
 				struct _detail<_F, pat::integer_sequence<S ...>> {
-					template <typename __F = _F> using type = add<multiply<compose<D<__F, select<S>>, G...>, D<G, dx>>...>;
+					template <typename __F = _F> using type = add<multiply<pat::compose<D<__F, pat::select<S>>, G...>, D<G, dx>>...>;
 				};
 			public:
 				template <typename __T=F> using type = typename _detail<F, pat::index_sequence_for<G ...>>::template type<>;

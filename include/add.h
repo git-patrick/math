@@ -9,8 +9,8 @@
 #ifndef math_add_h
 #define math_add_h
 
-#include "tmp.h"
-#include "tuple_help.h"
+#include <pat/tmp.h>
+#include <pat/tuple_help.h>
 #include "setup.h"
 
 namespace math {
@@ -174,7 +174,7 @@ namespace math {
 			struct __add<T, U, ap_lowest> {
 				typedef ___add<T,U> type;
 			};
-						
+			
 			template <typename F, typename G>
 			std::ostream & operator << (std::ostream & o, ___add<F,G> const & m) {
 				return o << m.get1() << " + " << m.get2();
