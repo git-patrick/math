@@ -1,5 +1,5 @@
 //
-//  vector_v3.h
+//  vector.h
 //  math
 //
 //  Created by Patrick Sauter on 3/15/14.

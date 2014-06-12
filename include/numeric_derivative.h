@@ -17,71 +17,17 @@
 
 #include <utility>
 #include <typeinfo>
-#include <pat/tuple_help.h>
+#include <pat/tuple.h>
+#include <array>
 
 #include "analytic.h"
 #include "core.h"
 #include "function_traits.h"
 
-
 namespace math {
 	// need to enable_if this for only callable types F
 	// X is the index of the parameter we are differentiating with respect to.
 	// N is the order of the derivative
-	
-	namespace detail {
-		template <typename ... R>
-		struct _wrapper { };
-		
-		template <int Y>
-		struct _get_coefficients;
-		
-		// first order derivative coefficients for finite central difference.
-		template <> struct _get_coefficients<1> {
-			typedef _wrapper<
-				analytic::rational<1,12>,
-				analytic::rational<-2,3>,
-				analytic::rational<0>,
-				analytic::rational<2,3>,
-				analytic::rational<-1,12>
-			> type;
-		};
-		
-		template <int Y>
-		using get_coefficients = typename _get_coefficients<Y>::type;
-		
-		template <typename Coef>
-		struct _get_coefficients_index;
-		
-		template <typename ... R>
-		struct _get_coefficients_index<_wrapper<R ...>> {
-			typedef pat::index_sequence_for<R ...> type;
-		};
-		
-		template <typename C>
-		using get_coefficients_index = typename _get_coefficients_index<C>::type;
-		
-		constexpr std::intmax_t lower_bound(std::intmax_t size) {
-			return -(size - 1) / 2;
-		}
-		constexpr std::intmax_t upper_bound(std::intmax_t size) {
-			return (size - 1) / 2;
-		}
-		
-		template <typename Coef>
-		struct _get_scale;
-		
-		template <typename ... R>
-		struct _get_scale<_wrapper<R ...>> {
-			typedef pat::sequence<lower_bound(sizeof...(R)), upper_bound(sizeof...(R))> type;
-		};
-		
-		template <typename C>
-		using get_scale = typename _get_scale<C>::type;
-	}
-	
-	// X is the index of the argument to take derivative with respect to
-	// N is the order of the derivative.
 	template <typename F, std::size_t N, std::size_t X>
 	class numeric_derivative : public function_traits<F> {
 	private:
@@ -139,54 +85,47 @@ namespace math {
 			}
 		};
 		
+		static constexpr std::array<std::array<reals_t, 7> const, 4> const _coefficients{{
+			{{ -1 / reals_t(60), 3 / reals_t(20), -3 / reals_t(4), 0, 3 / reals_t(4), -3 / reals_t(20), 1 / reals_t(60) }},
+			{{ 1 / reals_t(90), -3 / reals_t(20), 3 / reals_t(2), -49 / reals_t(18), 3 / reals_t(2), -3 / reals_t(20), 1 / reals_t(90) }},
+			{{ 1 / reals_t(8), -1, 13 / reals_t(8), 0, -13 / reals_t(8), 1, -1 / reals_t(8) }},
+			{{ -1 / reals_t(6), 2, -13 / reals_t(2), 28 / reals_t(3), -13 / reals_t(2), 2, -1 / reals_t(6) }}
+		}};
+				
+		static_assert(N <= _coefficients.size(),
+					  "Assertion failed, numeric derivative order not supported.  Add more coefficients to the central finite difference cofficients array in the class.");
 		
-		//	want to add support for higher order numerical derivatives using the same central difference technique
-	
-		/*
-		
-		template <int ... S, typename ... Args>
-		auto _call(
-			pat::integer_sequence<S ...> s,
-			Args const & ... a
-		) const -> decltype(_f(a ...) / _dx) {
-			// accuracy 4 central finite difference first order derivative
-		return (  reals_t(1) / 12 * _f(if_same<X, S>::_add(a, reals_t(-2) * _dx) ...)
-				- reals_t(2) / 3  * _f(if_same<X, S>::_add(a, -_dx ) ...)
-				+ reals_t(2) / 3  * _f(if_same<X, S>::_add(a, _dx) ...)
-				- reals_t(1) / 12 * _f(if_same<X, S>::_add(a, reals_t(2) * _dx) ...)) / _dx;
-		}
-		*/
-		
-		template <typename ... Args, typename ... Coefficients, int ... Scale, int ... Index, int ... S>
-		auto _call(
-			detail::_wrapper<Coefficients ...>,
-			pat::integer_sequence<Scale ...>,
-			pat::integer_sequence<Index ...>,
-			pat::integer_sequence<S ...>,
+		template <typename ... Args, int ... S>
+		result_t _call(
+			pat::integer_sequence<S ...> d,
 			Args const & ... args
-		) const -> decltype(analytic::add<pat::select<Index>...>()(Coefficients()() * _f(if_same<X, S>::_add(args, Scale * _dx) ...)...) / _dx) {
-			return (
-				analytic::add<pat::select<Index>...>()(Coefficients()() * _f(if_same<X, S>::_add(args, Scale * _dx) ...)...) / _dx
-			);
+		) const {
+			result_t res = 0;
+			
+			constexpr std::intmax_t const n = _coefficients[N - 1].size();
+			constexpr std::intmax_t const s = (1 - n) / 2;
+			
+			for (std::intmax_t i = 0; i < n; ++i) {
+				res += _coefficients[N - 1][i] * _f(if_same<X, S>::_add(args, (s + i) * _dx) ...);
+			}
+			
+			return res / std::pow(_dx, N);
 		}
 	public:
 		template <typename ... Args>
 		auto operator()(Args const & ... a) const -> decltype(_call(
-			detail::get_coefficients<N>{},
-			detail::get_scale<detail::get_coefficients<N>>{},
-			detail::get_coefficients_index<detail::get_coefficients<N>>{},
 			pat::index_sequence_for<Args ...>{},
 			a ...
 		)) {
 			return _call(
-				detail::get_coefficients<N>{},
-				detail::get_scale<detail::get_coefficients<N>>{},
-				detail::get_coefficients_index<detail::get_coefficients<N>>{},
 				pat::index_sequence_for<Args ...>{},
 				a ...
 			);
 		}
 	};
+	
+	template <typename F, std::size_t N, std::size_t X>
+	constexpr std::array<std::array<reals_t, 7> const, 4> const numeric_derivative<F,N,X>::_coefficients;
 	
 	template <std::size_t N, std::size_t X, typename F>
 	numeric_derivative<F, N, X> ND(F const & f, typename function_traits<F>::template arg<X> dx = infinitesimal_tag{}) {
@@ -195,7 +134,7 @@ namespace math {
 	
 	template <typename Functor, std::size_t N, std::size_t X>
 	std::ostream & operator << (std::ostream & o, numeric_derivative<Functor,N,X> const & m) {
-		return o << "ND<" << X << ">(" << typeid(Functor).name() << ", " << m.dx() << ")";
+		return o << "ND<" << N << "," << X << ">(" << typeid(Functor).name() << ", " << m.dx() << ")";
 	}
 }
 

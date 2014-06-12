@@ -100,6 +100,11 @@ namespace math {
 				template <typename __T=T> using type = multiply<cos<__T>, D<__T, dx>>;
 			};
 			
+			template <typename T, std::size_t N, std::size_t X>
+			struct __D<numeric_derivative<T, N, X>, pat::select<X>, derivative_analytic_stage> {
+				template <typename __T=T> using type = numeric_derivative<T, N + 1, X>;
+			};
+			
 			template <typename T, typename dx>
 			struct __D<__cos<T>, dx, derivative_analytic_stage> {
 				template <typename __T=T> using type = multiply<rational<-1>, sin<__T>, D<__T, dx>>;

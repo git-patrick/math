@@ -10,15 +10,7 @@
 #define math_check_h
 
 #include <complex>
-
-#define _MATH_NOCPP14_
-
-namespace std {
-#ifdef _MATH_NOCPP14_
-	template <bool Expr, typename T = void>
-	using enable_if_t = typename std::enable_if<Expr, T>::type;
-#endif
-}
+#include <pat/type_traits.h>
 
 namespace math {
 	// this is passed to constructors of objects expected to be treated as mathematically to make
@@ -39,7 +31,7 @@ namespace math {
 		template <typename T, typename = typename std::enable_if<std::is_floating_point<T>::value>::type>
 		constexpr explicit operator std::complex<T>() const { return std::complex<T>(1); }
 	};
-	
+		
 	// used to specify an "infinitesimal"
 	// aka, the smallest reasonable value where we don't end up ruining our accuracy because of floating point or any other issue.
 	// this is used, for instance, by default dx values in the derivative.
@@ -79,110 +71,45 @@ namespace math {
 			};
 		}
 		
-		template <typename A, typename B>
-		struct is_static_castable : std::integral_constant<bool, detail::is_static_castable<A,B>::value> { };
-		
 		namespace detail {
-            struct return_t { };
+			struct return_t { };
 			
 			// matches any return type != detail::return_t
-            template <typename T>
-            using any = std::integral_constant<bool,
-                !std::is_same<
-                    T,
-                    detail::return_t
-                >::value
-            >;
+			template <typename T>
+			using any = std::integral_constant<bool,
+				!std::is_same<
+					T,
+					detail::return_t
+				>::value
+			>;
 			
 			// matches static castable types to the chosen type
-            template <typename T, typename R>
-            using convertible = std::integral_constant<bool,
-                is_static_castable<
-                    typename std::decay<T>::type,
-                    typename std::decay<R>::type
-                >::value
-            >;
+			template <typename T, typename R>
+			using convertible = std::integral_constant<bool,
+				is_static_castable<
+					typename std::decay<T>::type,
+					typename std::decay<R>::type
+				>::value
+			>;
 			
 			// matches one return type
 			template <typename T, typename R>
-            using exact = std::integral_constant<bool,
-                std::is_same<
-                    typename std::decay<T>::type,
-                    typename std::decay<R>::type
-                >::value
-            >;
-        }
-        
-        // BINARY RELATIONS -- These work via argument dependent lookup.
-        
-        // ALGEBRAIC OPERATORS!
-        template <typename T, typename U>
-        detail::return_t operator==(T const & a, U const & b);
-        template <typename T, typename U>
-        detail::return_t operator!=(T const & a, U const & b);
-        
-        template <typename T, typename U>
-        struct has_equals : detail::any<decltype(std::declval<T>() == std::declval<U>())> { };
-        template <typename T, typename U>
-        struct has_notequals : detail::any<decltype(std::declval<T>() != std::declval<U>())> { };
-        
-        template <typename T, typename U>
-        detail::return_t operator+(T const & a, U const & b);
-        template <typename T>
-        detail::return_t operator+(T const & a);
-        
-        template <typename T, typename U>
-        detail::return_t operator-(T const & a, U const & b);
-        template <typename T>
-        detail::return_t operator-(T const & a);
-        
-        template <typename T, typename U>
-        detail::return_t operator*(T const & a, U const & b);
-        template <typename T, typename U>
-        detail::return_t operator/(T const & a, U const & b);
-        
-		template <typename T, typename U, typename R>
-        struct has_plusequals : detail::exact<decltype(std::declval<T>() + std::declval<U>()), R> { };
-        template <typename T, typename U, typename R>
-        struct has_plus : detail::exact<decltype(std::declval<T>() + std::declval<U>()), R> { };
-        template <typename T, typename R>
-        struct has_plus_unary : detail::exact<decltype(+std::declval<T>()), R> { };
+			using exact = std::integral_constant<bool,
+				std::is_same<
+					typename std::decay<T>::type,
+					typename std::decay<R>::type
+				>::value
+			>;
+		}
 		
-        template <typename T, typename U, typename R>
-        struct has_minus : detail::exact<decltype(std::declval<T>() - std::declval<U>()), R> { };
-        template <typename T, typename R>
-        struct has_minus_unary : detail::exact<decltype(-std::declval<T>()), R> { };
-        
-        template <typename T, typename U, typename R>
-        struct has_multiply : detail::exact<decltype(std::declval<T>() * std::declval<U>()), R> { };
-        template <typename T, typename U, typename R>
-        struct has_divide : detail::exact<decltype(std::declval<T>() / std::declval<U>()), R> { };
-		
+		template <typename A, typename B>
+		struct is_static_castable : std::integral_constant<bool, detail::is_static_castable<A,B>::value> { };
+
 		// IDENTITY PROPERTIES
 		template <typename T>
 		using has_additive_identity = is_static_castable<math::additive_identity_tag, T>;
 		template <typename T>
 		using has_multiplicative_identity = is_static_castable<math::multiplicative_identity_tag, T>;
-        
-        // ORDER PROPERTIES
-        template <typename T, typename U>
-        detail::return_t operator<(T const & a, U const & b);
-        template <typename T, typename U>
-        detail::return_t operator<=(T const & a, U const & b);
-        template <typename T, typename U>
-        detail::return_t operator>(T const & a, U const & b);
-        template <typename T, typename U>
-        detail::return_t operator>=(T const & a, U const & b);
-        
-        template <typename T, typename U>
-        struct has_less : detail::any<decltype(std::declval<T>() < std::declval<U>())> { };
-        template <typename T, typename U>
-        struct has_lessequal : detail::any<decltype(std::declval<T>() <= std::declval<U>())> { };
-        template <typename T, typename U>
-        struct has_greater : detail::any<decltype(std::declval<T>() > std::declval<U>())> { };
-        template <typename T, typename U>
-        struct has_greaterequal : detail::any<decltype(std::declval<T>() >= std::declval<U>())> { };
-		
 	
 		// MATH STUFF HERE WE GOOOo
 		template <typename T>
@@ -193,13 +120,13 @@ namespace math {
 		
 		template <typename T>
 		struct set : std::integral_constant<bool, 
-			has_equals<T,T>::value &&
-			has_notequals<T,T>::value
+			pat::traits::has_equals<T,T>::value &&
+			pat::traits::has_notequals<T,T>::value
 		> { };
 		
 		template <typename T>
 		struct monoid : std::integral_constant<bool, 
-			has_plus<T,T,T>::value &&
+			pat::traits::has_plus<T,T,T>::value &&
 			has_additive_identity<T>::value &&
 			set<T>::value
 		> { };
@@ -211,8 +138,8 @@ namespace math {
 
 		template <typename T>
 		struct group : std::integral_constant<bool, 
-			has_minus<T,T,T>::value &&
-			has_minus_unary<T,T>::value &&
+			pat::traits::has_minus<T,T,T>::value &&
+			pat::traits::has_minus_unary<T,T>::value &&
 			monoid<T>::value
 		> { };
 		
@@ -225,7 +152,7 @@ namespace math {
 		template <typename T>
 		struct ring : std::integral_constant<bool, 
 			abelian_group<T>::value &&
-			has_multiply<T,T,T>::value &&
+			pat::traits::has_multiply<T,T,T>::value &&
 			has_multiplicative_identity<T>::value
 		> { };
 		
@@ -235,10 +162,11 @@ namespace math {
 		> { };
 		
 		// division ring, domain, integral domain, semiring, near ring,
+		
 		template <typename T>
 		struct field : std::integral_constant<bool, 
 			commutative_ring<T>::value &&
-			has_divide<T,T,T>::value &&
+			pat::traits::has_divide<T,T,T>::value &&
 			!std::is_integral<T>::value
 		> {	};
 
@@ -246,8 +174,8 @@ namespace math {
 		struct vector_space : std::integral_constant<bool, 
 			abelian_group<Object>::value &&
 			field<Scalar>::value &&
-			has_multiply<Scalar, Object, Object>::value &&
-			has_multiply<Object, Scalar, Object>::value
+			pat::traits::has_multiply<Scalar, Object, Object>::value &&
+			pat::traits::has_multiply<Object, Scalar, Object>::value
 		> { };
 		
 		// INNER PRODUCT SPACE REQUIREMENTS
@@ -260,7 +188,7 @@ namespace math {
 		template <typename Object, typename Field>
 		struct algebra : std::integral_constant<bool, 
 			vector_space<Object, Field>::value &&
-			has_multiply<Object, Object, Object>::value
+			pat::traits::has_multiply<Object, Object, Object>::value
 		> { };
 	}
 	

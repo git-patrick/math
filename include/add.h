@@ -10,7 +10,7 @@
 #define math_add_h
 
 #include <pat/tmp.h>
-#include <pat/tuple_help.h>
+#include <pat/tuple.h>
 #include "setup.h"
 
 namespace math {

@@ -7,7 +7,7 @@
 //
 
 #include <iostream>
-#include <pat/tuple_help.h>
+#include <pat/tuple.h>
 
 #include "analytic.h"
 #include "derivative.h"
@@ -58,7 +58,7 @@ int main(int argc, const char * argv[])
 
 	std::cout
 		<< "COMPILE TIME EXPRESSION SIMPLIFICATION" << std::endl
-		<< "    " << multiply<rational<0>, add<x,x>>() << std::endl
+		<< "    " << multiply<rational<0>, add<x,x>>() << " " << multiply<rational<0>, add<x,x>>()(1) << std::endl
 		<< "    " << multiply<add<x,x>, add<x,x>>() << std::endl
 		<< "    " << multiply<rational<3,2>, x, complex<3,1,1,1>, x, x, x, exp<y>, sin<z>, exp<x>, sin<z>, sin<z>>() << std::endl
 		<< "    " << multiply<exp<x>, x, exp<y>, compose<arbitrary_functor2, add<x,y>>>() << std::endl << std::endl
@@ -84,7 +84,10 @@ int main(int argc, const char * argv[])
 	
 	std::cout
 		<< "EXAMPLE OUTPUT" << std::endl
-		<< "    " << D<multiply<exp<x>, x, exp<y>, arbitrary_functor>, x>()(1,0) << std::endl << std::endl
+		<< "    " << D<arbitrary_functor, x>() << std::endl
+		<< "    " << D<arbitrary_functor, x>()(1,0) << std::endl
+		<< "    " << D<D<arbitrary_functor, x>,x>() << std::endl
+		<< "    " << D<D<arbitrary_functor, x>,x>()(1,0) << std::endl << std::endl
 	;
 	
 	std::cout

@@ -1,3 +1,14 @@
+I WROTE A table CLASS MOSTLY FOR SOLVING SYSTEMS OF EQUATIONS.  I generalized my row_reduce algorithm from matrix
+and put it into algorithm.h  -- I need to make matrix compatible with this row_reduce function.
+thinking of changing matrix to class matrix : public std::array<std::array<Type, M>, N>
+to provide similar iterators to table in terms of begin() and end() ...
+not sure, we shall see.
+
+I changed table quite a bit, added support for functors which process the array data and produce
+values that the new table_row class stores with the array data.
+this means I will probably be changing the implementation of my row_reduce algorithm.
+
+
 Fix up the derivative.h implementation.  don't need all those aliases.
 compile time indefinite intregrals of analytic functions!
 compile time evaluation of functors with constant functor input (ie, exp<rational<3,2>> should evaluate to a rational<...>)

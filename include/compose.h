@@ -19,4 +19,11 @@ namespace pat {
 	}
 }
 
+namespace std {
+	template <typename ... Args>
+	std::ostream & operator << (std::ostream & o, std::tuple<Args ...> const & t) {
+		return pat::print_tuple(o, t);
+	}
+}
+
 #endif

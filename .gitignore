@@ -178,7 +178,9 @@ xcuserdata
 
 # my ignore directory
 ignore/
+makefile
 math.xcodeproj/
+math.xcworkspace/
 
 # Build results
 [Dd]ebug/

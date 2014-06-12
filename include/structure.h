@@ -23,13 +23,13 @@
 */
 
 namespace math {
-	namespace test {
+	namespace structure {
 		template <typename T>
 		struct set {
 			// currently requiring objects to be comparable
-			static_assert(math::check::has_equals<T,T>::value,
+			static_assert(pat::has_equals<T,T>::value,
 						  "Assertion failed, no operator==");
-			static_assert(math::check::has_notequals<T,T>::value,
+			static_assert(pat::has_notequals<T,T>::value,
 						  "Assertion failed, no operator!=");
 		};
 		
@@ -37,7 +37,7 @@ namespace math {
 		struct monoid : virtual set<T>
 		{
 			// operator + (a,b);
-			static_assert(math::check::has_plus<T,T,T>::value,
+			static_assert(pat::has_plus<T,T,T>::value,
 						  "Assertion failed, no operator+(a,b)");
 							
 			// must be associative!
@@ -64,9 +64,9 @@ namespace math {
 			// existence of the operators can be checked by the compiler
 			
 
-			static_assert(math::check::has_minus<T,T,T>::value,
+			static_assert(pat::has_minus<T,T,T>::value,
 						  "Assertion failed, no operator-(a,b)");
-			static_assert(math::check::has_minus_unary<T,T>::value,
+			static_assert(pat::has_minus_unary<T,T>::value,
 						  "Assertion failed, no operator-(a)");
 						  
 			// these operators have to be related of course.
@@ -104,7 +104,7 @@ namespace math {
 		struct ring : virtual abelian_group<T> {
 			// operator * (a,b);
 			
-			static_assert(math::check::has_multiply<T,T,T>::value,
+			static_assert(pat::has_multiply<T,T,T>::value,
 						  "Assertion failed, no operator*(a,b)");
 
 			// programmer must ensure
@@ -139,7 +139,7 @@ namespace math {
 		struct field : virtual commutative_ring<T> //, virtual vector_space<T, field<T>>
 		{
 			// operator / (a,b); b != additive_identity
-			static_assert(math::check::has_divide<T,T,T>::value,
+			static_assert(pat::has_divide<T,T,T>::value,
 						  "Assertion failed, no operator/(a,b)");
 			
 			// a / b * b == a
@@ -164,9 +164,9 @@ namespace math {
 						  "Assertion failed, Scalars are not a field");
 			
 			// scalar multiplication
-			static_assert(math::check::has_multiply<Scalar, Object, Object>::value,
+			static_assert(pat::has_multiply<Scalar, Object, Object>::value,
 						  "Assertion failed, no scalar multiplication (s * V)");
-			static_assert(math::check::has_multiply<Object, Scalar, Object>::value,
+			static_assert(pat::has_multiply<Object, Scalar, Object>::value,
 						  "Assertion failed, no scalar multiplication (V * s)");
 			
 			// distributive properties of scalar multiplication over addition
@@ -187,7 +187,7 @@ namespace math {
 		template <typename Object, typename Scalar>
 		struct algebra : vector_space<Object, Scalar> {
 			// assert the existence of a bilinear product
-			static_assert(math::check::has_multiply<Object, Object, Object>::value,
+			static_assert(pat::has_multiply<Object, Object, Object>::value,
 						  "Assertion failed, no inner product");
 		};
 		
